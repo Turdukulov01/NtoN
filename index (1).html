@@ -9,15 +9,15 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
 :root {
-  --bg: #0a0b0f;
-  --bg2: #12141a;
-  --bg3: #1a1d27;
-  --bg4: #22263a;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #e8eaf0;
-  --text2: #8b90a7;
-  --text3: #555a72;
+  --bg: #0b0d12;
+  --bg2: #13161d;
+  --bg3: #1b2030;
+  --bg4: #262c40;
+  --border: rgba(215,225,255,0.075);
+  --border2: rgba(215,225,255,0.14);
+  --text: #edf0f6;
+  --text2: #9ca3b8;
+  --text3: #697089;
   --accent: #6c63ff;
   --accent2: #a78bfa;
   --green: #22d3a5;
@@ -85,7 +85,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); line
 .btn-icon:hover { color: var(--text); border-color: var(--border2); }
 
 /* Page content */
-.content { padding: 24px 28px; }
+.content { padding: 22px 28px; }
+.content-narrow { max-width: 1680px; margin: 0 auto; }
 
 /* Stat cards */
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
@@ -99,10 +100,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); line
 .stat-change.down { color: var(--red); }
 
 /* Cards */
-.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); }
-.card-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card { background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0)) var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 14px 40px rgba(0,0,0,0.12); }
+.card-header { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .card-title { font-size: 15px; font-weight: 600; }
-.card-body { padding: 20px; }
+.card-body { padding: 16px 18px; }
 
 /* Grid layouts */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
@@ -111,8 +112,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); line
 /* Table */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
-thead th { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-tbody td { padding: 12px 12px; font-size: 13px; border-bottom: 1px solid var(--border); }
+thead th { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+tbody td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--border); }
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: rgba(255,255,255,0.02); }
 
@@ -156,6 +157,7 @@ select.filter-select { background: var(--bg3); border: 1px solid var(--border); 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .modal-overlay.open { opacity: 1; pointer-events: all; }
 .modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; width: 480px; max-width: 90vw; box-shadow: var(--shadow); transform: translateY(16px); transition: transform 0.2s; }
+.modal-wide { width: 760px; }
 .modal-overlay.open .modal { transform: translateY(0); }
 .modal-header { padding: 22px 24px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
 .modal-title { font-size: 17px; font-weight: 700; }
@@ -170,9 +172,38 @@ select.filter-select { background: var(--bg3); border: 1px solid var(--border); 
 .form-select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font); font-size: 13px; padding: 10px 12px; outline: none; transition: border-color 0.15s; cursor: pointer; }
 .form-select:focus { border-color: var(--accent); }
 .form-hint { font-size: 11px; color: var(--text3); margin-top: 4px; }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.detail-grid { display: grid; grid-template-columns: 170px 1fr; gap: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.detail-label { background: rgba(255,255,255,0.018); color: var(--text2); font-size: 12px; font-weight: 600; padding: 11px 12px; border-bottom: 1px solid var(--border); }
+.detail-value { color: var(--text); font-size: 13px; padding: 11px 12px; border-bottom: 1px solid var(--border); min-width: 0; overflow-wrap: anywhere; }
+.detail-grid .detail-label:nth-last-child(2), .detail-grid .detail-value:last-child { border-bottom: none; }
+.tx-actions { display: flex; align-items: center; gap: 6px; }
+.tx-row { cursor: pointer; }
+.tx-row:hover { background: rgba(255,255,255,0.035); }
 
 /* Charts */
 .chart-wrap { position: relative; height: 220px; }
+.analytics-chart-card { margin-bottom: 14px; }
+.analytics-chart-wrap { height: 260px; }
+.analytics-controls { display: grid; grid-template-columns: 1fr 1fr 1.1fr 1.1fr auto auto auto; gap: 10px; align-items: end; margin-bottom: 14px; }
+.analytics-control label { display: block; color: var(--text3); font-size: 10px; font-weight: 700; letter-spacing: 0.45px; text-transform: uppercase; margin-bottom: 5px; }
+.analytics-control .form-input, .analytics-control .form-select { height: 38px; font-family: var(--font); }
+.analytics-buttons { display: flex; gap: 6px; }
+.analytics-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+.analytics-metric { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+.metric-label { color: var(--text3); font-size: 11px; font-weight: 700; letter-spacing: 0.45px; text-transform: uppercase; margin-bottom: 8px; }
+.metric-value { color: var(--text); font-size: 20px; font-weight: 700; line-height: 1.15; }
+.metric-sub { color: var(--text2); font-size: 12px; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.asset-chip { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; background: rgba(108,99,255,0.14); color: var(--text); font-size: 11px; font-weight: 700; }
+.asset-flow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.flow-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+.flow-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.flow-period { color: var(--text3); font-size: 12px; font-weight: 600; }
+.flow-net { font-family: var(--mono); font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+.flow-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.flow-stat-label { color: var(--text3); font-size: 11px; margin-bottom: 3px; }
+.flow-stat-value { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.flow-tx { color: var(--text3); font-size: 11px; margin-top: 10px; }
 
 /* Sync status indicator */
 .sync-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
@@ -224,12 +255,16 @@ select.filter-select { background: var(--bg3); border: 1px solid var(--border); 
 /* Responsive tweaks */
 @media (max-width: 1200px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .analytics-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .analytics-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid-2 { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: 1fr; }
 }
 @media (max-width: 800px) {
   .layout { grid-template-columns: 1fr; }
   .sidebar { display: none; }
+  .analytics-controls { grid-template-columns: 1fr; }
+  .analytics-summary { grid-template-columns: 1fr; }
 }
 
 /* Login page */
@@ -239,6 +274,8 @@ select.filter-select { background: var(--bg3); border: 1px solid var(--border); 
 .login-logo-icon { width: 56px; height: 56px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 12px; }
 .login-title { font-size: 22px; font-weight: 700; }
 .login-sub { font-size: 13px; color: var(--text3); }
+.login-error { display: none; margin: -6px 0 16px; padding: 10px 12px; border: 1px solid rgba(248,113,113,0.28); border-radius: var(--radius-sm); background: rgba(248,113,113,0.1); color: var(--red); font-size: 12px; font-weight: 600; }
+.login-error.show { display: block; }
 </style>
 </head>
 <body>
@@ -253,17 +290,28 @@ const state = {
   page: 'dashboard',
   user: null,
   token: localStorage.getItem('token'),
+  loginError: '',
   wallets: [],
   transactions: [],
   analytics: [],
   syncStatus: {},
   loading: false,
   modal: null,
+  txDraftHash: null,
+  txDetailHash: null,
   filters: { network: 'all', search: '', page: 1 },
   txFilters: { walletId: null, page: 1, direction: 'all' },
-  analyticsFilter: { walletId: null, year: new Date().getFullYear() },
+  analyticsFilter: { walletId: null, year: new Date().getFullYear(), asset: 'all', dateFrom: '', dateTo: '', group: 'tx', metric: 'count' },
   totalWallets: 0,
   totalTx: 0,
+};
+
+const AUTH_ACCOUNT = {
+  email: 'admin@company.com',
+  password: 'Monitor2026!',
+  name: 'Администратор',
+  role: 'admin',
+  sessionHours: 12,
 };
 
 // Mock data for demo (replace with real API calls)
@@ -276,11 +324,11 @@ const MOCK = {
     { id: '5', address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', network: 'bitcoin', label: 'Cold storage', tags: ['cold'], is_active: true, last_sync: '2026-04-05T20:00:00Z' },
   ],
   transactions: [
-    { tx_hash: '0xabc123def456abc123def456abc123def456abc123def456abc123def456abc1', timestamp: '2026-04-06T10:15:00Z', from_address: '0x742d35Cc...', to_address: '0xdAC17F95...', amount: '1250.500000', asset: 'USDT', direction: 'incoming', usd_value: '1250.50', network: 'ethereum', is_error: false },
-    { tx_hash: '0xdef789abc012def789abc012def789abc012def789abc012def789abc012def7', timestamp: '2026-04-05T18:30:00Z', from_address: '0x742d35Cc...', to_address: '0xA0b86991...', amount: '0.250000', asset: 'ETH', direction: 'outgoing', usd_value: '612.50', network: 'ethereum', is_error: false },
-    { tx_hash: 'abc123def456abc123def456abc123def456abc123def456abc123def456abc1', timestamp: '2026-04-05T12:00:00Z', from_address: 'TQn9Y2kh...', to_address: 'TXhMCqF2...', amount: '15000.000000', asset: 'TRX', direction: 'incoming', usd_value: '1650.00', network: 'tron', is_error: false },
-    { tx_hash: 'f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1', timestamp: '2026-04-04T09:00:00Z', from_address: '1A1zP1eP...', to_address: 'bc1qxy2kg...', amount: '0.05432100', asset: 'BTC', direction: 'outgoing', usd_value: '3450.80', network: 'bitcoin', is_error: false },
-    { tx_hash: '9876543210abcdef9876543210abcdef9876543210abcdef9876543210abcdef', timestamp: '2026-04-03T16:45:00Z', from_address: '0xExternal...', to_address: '0x742d35Cc...', amount: '5000.000000', asset: 'USDT', direction: 'incoming', usd_value: '5000.00', network: 'ethereum', is_error: false },
+    { wallet_id: '2', tx_hash: '0xabc123def456abc123def456abc123def456abc123def456abc123def456abc1', timestamp: '2026-04-06T10:15:00Z', from_address: '0x742d35Cc6634C0532925a3b8D4C9C1F4b7Ac3fA', to_address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', amount: '1250.500000', asset: 'USDT', direction: 'incoming', usd_value: '1250.50', network: 'ethereum', is_error: false, owner_address: '0x742d35Cc6634C0532925a3b8D4C9C1F4b7Ac3fA', contract_address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', token_from: '0xExternal000000000000000000000000000000000000', token_to: '0x742d35Cc6634C0532925a3b8D4C9C1F4b7Ac3fA', token_amount: '1250.500000', token_symbol: 'USDT', method: 'transfer()', method_id: 'a9059cbb', input_data: '[0]: 000000000000000000000000742d35cc6634c0532925a3b8d4c9c1f4b7ac3fa' },
+    { wallet_id: '2', tx_hash: '0xdef789abc012def789abc012def789abc012def789abc012def789abc012def7', timestamp: '2026-04-05T18:30:00Z', from_address: '0x742d35Cc6634C0532925a3b8D4C9C1F4b7Ac3fA', to_address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', amount: '0.250000', asset: 'ETH', direction: 'outgoing', usd_value: '612.50', network: 'ethereum', is_error: false, owner_address: '0x742d35Cc6634C0532925a3b8D4C9C1F4b7Ac3fA', contract_address: '', token_from: '0x742d35Cc6634C0532925a3b8D4C9C1F4b7Ac3fA', token_to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', token_amount: '0.250000', token_symbol: 'ETH', method: 'native transfer', method_id: '', input_data: '' },
+    { wallet_id: '3', tx_hash: 'abc123def456abc123def456abc123def456abc123def456abc123def456abc1', timestamp: '2026-04-05T12:00:00Z', from_address: 'TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE', to_address: 'TXhMCqF2xx9XkS9k12tq3W9wYq7k8q2f11', amount: '15000.000000', asset: 'TRX', direction: 'incoming', usd_value: '1650.00', network: 'tron', is_error: false, owner_address: 'TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE', contract_address: 'TUE1Dzqo1HXpPGCJR54982qtGxDFudqRx4', token_from: 'TUE1Dzqo1HXpPGCJR54982qtGxDFudqRx4', token_to: 'TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE', token_amount: '15000.000000', token_symbol: 'TRX', method: 'transfer()', method_id: '9e281a98', input_data: '[0]: 000000000000000000000000a2726afbecbd8e936000ed684cef5e2f5cf43008' },
+    { wallet_id: '5', tx_hash: 'f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1', timestamp: '2026-04-04T09:00:00Z', from_address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf', to_address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', amount: '0.05432100', asset: 'BTC', direction: 'outgoing', usd_value: '3450.80', network: 'bitcoin', is_error: false, owner_address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', contract_address: '', token_from: '1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf', token_to: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', token_amount: '0.05432100', token_symbol: 'BTC', method: 'native transfer', method_id: '', input_data: '' },
+    { wallet_id: '4', tx_hash: '9876543210abcdef9876543210abcdef9876543210abcdef9876543210abcdef', timestamp: '2026-04-03T16:45:00Z', from_address: '0xExternal000000000000000000000000000000000000', to_address: '0x742d35Cc6634C0532925a3b8D4C9C1F4b7Ac3fA', amount: '5000.000000', asset: 'USDT', direction: 'incoming', usd_value: '5000.00', network: 'ethereum', is_error: false, owner_address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', contract_address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', token_from: '0xExternal000000000000000000000000000000000000', token_to: '0x742d35Cc6634C0532925a3b8D4C9C1F4b7Ac3fA', token_amount: '5000.000000', token_symbol: 'USDT', method: 'transfer()', method_id: 'a9059cbb', input_data: '[0]: 000000000000000000000000742d35cc6634c0532925a3b8d4c9c1f4b7ac3fa' },
   ],
   monthly: [
     { year: 2026, month: 4, asset: 'USDT', volume_in: '6250.50', volume_out: '1200.00', volume_total: '7450.50', net_flow: '5050.50', tx_count_in: 12, tx_count_out: 3, tx_count_total: 15 },
@@ -293,6 +341,41 @@ const MOCK = {
     { year: 2026, month: 4, asset: 'TRX', volume_in: '15000', volume_out: '4200', volume_total: '19200', net_flow: '10800', tx_count_in: 8, tx_count_out: 3, tx_count_total: 11 },
   ],
 };
+
+const STORAGE_KEYS = {
+  wallets: 'cryptoMonitor.wallets.v1',
+  transactions: 'cryptoMonitor.transactions.v1',
+};
+
+function readStoredArray(key) {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) || 'null');
+    return Array.isArray(parsed) ? parsed : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function persistData() {
+  localStorage.setItem(STORAGE_KEYS.wallets, JSON.stringify(MOCK.wallets));
+  localStorage.setItem(STORAGE_KEYS.transactions, JSON.stringify(MOCK.transactions));
+}
+
+function restorePersistedData() {
+  const wallets = readStoredArray(STORAGE_KEYS.wallets);
+  const transactions = readStoredArray(STORAGE_KEYS.transactions);
+  if (wallets) MOCK.wallets = wallets;
+  if (transactions) MOCK.transactions = transactions;
+}
+
+function resetTestData() {
+  if (!confirm('Сбросить тестовые кошельки и транзакции к исходным данным?')) return;
+  localStorage.removeItem(STORAGE_KEYS.wallets);
+  localStorage.removeItem(STORAGE_KEYS.transactions);
+  location.reload();
+}
+
+restorePersistedData();
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
 function shortAddr(addr) {
@@ -309,9 +392,28 @@ function fmt(n, dec=2) {
   return num.toFixed(dec);
 }
 
+function fmtUsd(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num) || value === '') return '—';
+  return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function fmtDate(iso) {
   if (!iso) return '—';
-  return new Date(iso).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+}
+
+function toUtcInputValue(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = value => String(value).padStart(2, '0');
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+}
+
+function utcInputToIso(value) {
+  if (!value) return new Date().toISOString();
+  return `${value}:00.000Z`;
 }
 
 function monthName(m) {
@@ -322,6 +424,315 @@ function netBadge(net) {
   const cls = net === 'bitcoin' ? 'badge-btc' : net === 'ethereum' ? 'badge-eth' : 'badge-trx';
   const label = net === 'bitcoin' ? 'BTC' : net === 'ethereum' ? 'ETH' : 'TRX';
   return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function walletDisplayName(wallet) {
+  if (!wallet) return '—';
+  return wallet.label || wallet.address || wallet.network;
+}
+
+const KNOWN_TOKEN_SYMBOLS = {
+  tr7nhqjekqxgtci8q8zy4pl8otszgjlj6t: 'USDT',
+};
+
+function pad2(value) {
+  return String(value).padStart(2, '0');
+}
+
+function dateInputFromUtc(date) {
+  return `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}`;
+}
+
+function getAnalyticsDateRange(year = state.analyticsFilter.year) {
+  const safeYear = Number(year) || new Date().getFullYear();
+  const fromValue = state.analyticsFilter.dateFrom || `${safeYear}-01-01`;
+  const toValue = state.analyticsFilter.dateTo || `${safeYear}-12-31`;
+  let from = new Date(`${fromValue}T00:00:00.000Z`);
+  let to = new Date(`${toValue}T23:59:59.999Z`);
+  if (Number.isNaN(from.getTime())) from = new Date(`${safeYear}-01-01T00:00:00.000Z`);
+  if (Number.isNaN(to.getTime())) to = new Date(`${safeYear}-12-31T23:59:59.999Z`);
+  if (from > to) [from, to] = [to, from];
+  return { from, to, fromValue: dateInputFromUtc(from), toValue: dateInputFromUtc(to) };
+}
+
+function setAnalyticsYear(year) {
+  state.analyticsFilter.year = year;
+  state.analyticsFilter.dateFrom = `${year}-01-01`;
+  state.analyticsFilter.dateTo = `${year}-12-31`;
+  rerender();
+}
+
+function setAnalyticsDateFilter(key, value) {
+  state.analyticsFilter[key] = value;
+  if (value) state.analyticsFilter.year = new Date(`${value}T00:00:00.000Z`).getUTCFullYear();
+  rerender();
+}
+
+function setAnalyticsPreset(days) {
+  const txs = MOCK.transactions
+    .filter(tx => !state.analyticsFilter.walletId || tx.wallet_id === state.analyticsFilter.walletId)
+    .map(tx => new Date(tx.timestamp))
+    .filter(date => !Number.isNaN(date.getTime()))
+    .sort((a, b) => a - b);
+  const latest = txs.at(-1) || new Date(`${state.analyticsFilter.year}-12-31T00:00:00.000Z`);
+  if (days === 'year') {
+    setAnalyticsYear(latest.getUTCFullYear());
+    return;
+  }
+  const from = new Date(latest);
+  from.setUTCDate(from.getUTCDate() - Number(days) + 1);
+  state.analyticsFilter.year = latest.getUTCFullYear();
+  state.analyticsFilter.dateFrom = dateInputFromUtc(from);
+  state.analyticsFilter.dateTo = dateInputFromUtc(latest);
+  rerender();
+}
+
+function zoomAnalyticsRange(factor) {
+  const { from, to } = getAnalyticsDateRange();
+  const minSpan = 24 * 60 * 60 * 1000;
+  const center = (from.getTime() + to.getTime()) / 2;
+  const span = Math.max(minSpan, (to.getTime() - from.getTime()) * factor);
+  const nextFrom = new Date(center - span / 2);
+  const nextTo = new Date(center + span / 2);
+  state.analyticsFilter.dateFrom = dateInputFromUtc(nextFrom);
+  state.analyticsFilter.dateTo = dateInputFromUtc(nextTo);
+  state.analyticsFilter.year = nextFrom.getUTCFullYear();
+  rerender();
+}
+
+function shiftAnalyticsRange(direction) {
+  const { from, to } = getAnalyticsDateRange();
+  const span = Math.max(24 * 60 * 60 * 1000, to.getTime() - from.getTime());
+  const delta = span * 0.5 * direction;
+  state.analyticsFilter.dateFrom = dateInputFromUtc(new Date(from.getTime() + delta));
+  state.analyticsFilter.dateTo = dateInputFromUtc(new Date(to.getTime() + delta));
+  state.analyticsFilter.year = new Date(from.getTime() + delta).getUTCFullYear();
+  rerender();
+}
+
+function getAnalyticsTransactions(walletId = null, year = new Date().getFullYear()) {
+  const { from, to } = getAnalyticsDateRange(year);
+  return MOCK.transactions.filter(tx => {
+    const date = new Date(tx.timestamp);
+    return (!walletId || tx.wallet_id === walletId)
+      && !Number.isNaN(date.getTime())
+      && date >= from
+      && date <= to;
+  });
+}
+
+function normalizeAssetSymbol(tx) {
+  const contractSymbol = KNOWN_TOKEN_SYMBOLS[String(tx.contract_address || '').toLowerCase()];
+  const rawSymbol = String(tx.token_symbol || tx.asset || '').trim().toUpperCase();
+  if (contractSymbol) return contractSymbol;
+  if (rawSymbol && rawSymbol !== 'TRC20') return rawSymbol;
+  if (!tx.contract_address && tx.network === 'tron') return 'TRX';
+  return rawSymbol || 'UNKNOWN';
+}
+
+function getAnalyticsAmount(tx) {
+  const amount = Number(tx.token_amount || tx.amount || 0);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function parseTrxFee(value) {
+  const match = String(value || '').match(/([\d.,]+)\s*TRX/i);
+  return match ? Number(match[1].replace(',', '.')) || 0 : 0;
+}
+
+function getNetworkLabel(network) {
+  if (network === 'tron') return 'TRON';
+  if (network === 'ethereum') return 'Ethereum';
+  if (network === 'bitcoin') return 'Bitcoin';
+  return String(network || 'Network').toUpperCase();
+}
+
+function getAnalyticsAssetType(item) {
+  return item.contract_address && normalizeAssetSymbol(item) !== 'TRX' ? 'Токен контракта' : 'Монета сети';
+}
+
+function getAnalyticsTransferItems(walletId = null, year = new Date().getFullYear(), assetFilter = 'all') {
+  return getAnalyticsTransactions(walletId, year)
+    .map(tx => ({
+      ...tx,
+      date: new Date(tx.timestamp),
+      asset_normalized: normalizeAssetSymbol(tx),
+      amount_numeric: getAnalyticsAmount(tx),
+      network_label: getNetworkLabel(tx.network),
+      asset_type: getAnalyticsAssetType(tx),
+    }))
+    .filter(tx => tx.tx_type !== 'resource_reclaim')
+    .filter(tx => tx.amount_numeric > 0)
+    .filter(tx => assetFilter === 'all' || tx.asset_normalized === assetFilter)
+    .sort((a, b) => a.date - b.date);
+}
+
+function getAnalyticsBucket(date, group) {
+  if (group === 'day') {
+    const key = dateInputFromUtc(date);
+    return { key, label: key };
+  }
+  const month = date.getUTCMonth() + 1;
+  return {
+    key: `${date.getUTCFullYear()}-${pad2(month)}`,
+    label: `${monthName(month)} ${date.getUTCFullYear()}`,
+  };
+}
+
+function getAnalyticsRows(walletId = null, year = new Date().getFullYear(), assetFilter = 'all', group = 'month') {
+  const groups = new Map();
+  getAnalyticsTransferItems(walletId, year, assetFilter)
+    .forEach(tx => {
+      const bucket = getAnalyticsBucket(tx.date, group);
+      const key = `${bucket.key}-${tx.asset_normalized}-${tx.network}`;
+      if (!groups.has(key)) {
+        groups.set(key, {
+          year,
+          month: tx.date.getUTCMonth() + 1,
+          period_key: bucket.key,
+          period_label: bucket.label,
+          asset: tx.asset_normalized,
+          network: tx.network,
+          network_label: tx.network_label,
+          asset_type: tx.asset_type,
+          volume_in: 0,
+          volume_out: 0,
+          tx_count_in: 0,
+          tx_count_out: 0,
+        });
+      }
+
+      const row = groups.get(key);
+      if (tx.direction === 'incoming') {
+        row.volume_in += tx.amount_numeric;
+        row.tx_count_in += 1;
+      } else {
+        row.volume_out += tx.amount_numeric;
+        row.tx_count_out += 1;
+      }
+    });
+
+  return [...groups.values()].map(row => ({
+    ...row,
+    volume_total: row.volume_in + row.volume_out,
+    net_flow: row.volume_in - row.volume_out,
+    tx_count_total: row.tx_count_in + row.tx_count_out,
+  })).sort((a, b) => b.period_key.localeCompare(a.period_key) || a.asset.localeCompare(b.asset));
+}
+
+function getAnalyticsAssetTotals(walletId = null, year = new Date().getFullYear(), assetFilter = 'all') {
+  const groups = new Map();
+  getAnalyticsTransferItems(walletId, year, assetFilter).forEach(tx => {
+    const key = `${tx.asset_normalized}-${tx.network}`;
+    if (!groups.has(key)) {
+      groups.set(key, {
+        asset: tx.asset_normalized,
+        network: tx.network,
+        network_label: tx.network_label,
+        asset_type: tx.asset_type,
+        volume_in: 0,
+        volume_out: 0,
+        tx_count_in: 0,
+        tx_count_out: 0,
+      });
+    }
+    const row = groups.get(key);
+    if (tx.direction === 'incoming') {
+      row.volume_in += tx.amount_numeric;
+      row.tx_count_in += 1;
+    } else {
+      row.volume_out += tx.amount_numeric;
+      row.tx_count_out += 1;
+    }
+  });
+
+  return [...groups.values()].map(row => ({
+    ...row,
+    volume_total: row.volume_in + row.volume_out,
+    net_flow: row.volume_in - row.volume_out,
+    tx_count_total: row.tx_count_in + row.tx_count_out,
+  })).sort((a, b) => a.asset.localeCompare(b.asset));
+}
+
+function getAnalyticsAssetOptions(walletId = null, year = new Date().getFullYear()) {
+  return [...new Set(getAnalyticsTransferItems(walletId, year, 'all').map(tx => tx.asset_normalized))].sort();
+}
+
+function getAnalyticsSummary(walletId = null, year = new Date().getFullYear(), assetFilter = 'all') {
+  const txs = getAnalyticsTransactions(walletId, year);
+  const rows = getAnalyticsAssetTotals(walletId, year, assetFilter);
+  const serviceTxs = txs
+    .filter(tx => tx.tx_type === 'resource_reclaim' || getAnalyticsAmount(tx) <= 0)
+    .filter(tx => assetFilter === 'all' || normalizeAssetSymbol(tx) === assetFilter);
+  const feeTxs = assetFilter === 'all'
+    ? txs
+    : txs.filter(tx => normalizeAssetSymbol(tx) === assetFilter);
+  return {
+    assets: [...new Set(rows.map(row => row.asset))],
+    incomingTx: rows.reduce((sum, row) => sum + row.tx_count_in, 0),
+    outgoingTx: rows.reduce((sum, row) => sum + row.tx_count_out, 0),
+    serviceTx: serviceTxs.length,
+    feesTrx: feeTxs.reduce((sum, tx) => sum + parseTrxFee(tx.resources_fee), 0),
+  };
+}
+
+function chartDirectionLabel(direction) {
+  return direction === 'incoming' ? 'Пришло' : 'Ушло';
+}
+
+function formatChartTxLabel(date) {
+  return `${pad2(date.getUTCDate())} ${monthName(date.getUTCMonth() + 1)} ${pad2(date.getUTCHours())}:${pad2(date.getUTCMinutes())}`;
+}
+
+function getAnalyticsChartItems(walletId = null, year = new Date().getFullYear(), assetFilter = 'all', group = 'tx', metric = 'count') {
+  if (group === 'tx') {
+    return getAnalyticsTransferItems(walletId, year, assetFilter).map(tx => ({
+      label: formatChartTxLabel(tx.date),
+      title: `${fmtDate(tx.timestamp)} · ${tx.asset_normalized}`,
+      key: `${tx.asset_normalized}-${tx.direction}`,
+      asset: tx.asset_normalized,
+      direction: tx.direction,
+      direction_label: chartDirectionLabel(tx.direction),
+      value: metric === 'count' ? 1 : tx.amount_numeric,
+      amount: tx.amount_numeric,
+      hash: tx.tx_hash,
+      wallet: walletDisplayName(getWalletById(tx.wallet_id)),
+      network_label: tx.network_label,
+    }));
+  }
+
+  return getAnalyticsRows(walletId, year, assetFilter, group).flatMap(row => {
+    const items = [];
+    if (row.tx_count_in > 0) {
+      items.push({
+        label: row.period_label,
+        title: `${row.period_label} · ${row.asset}`,
+        key: `${row.asset}-incoming`,
+        asset: row.asset,
+        direction: 'incoming',
+        direction_label: 'Пришло',
+        value: metric === 'count' ? row.tx_count_in : row.volume_in,
+        amount: row.volume_in,
+        tx_count: row.tx_count_in,
+        network_label: row.network_label,
+      });
+    }
+    if (row.tx_count_out > 0) {
+      items.push({
+        label: row.period_label,
+        title: `${row.period_label} · ${row.asset}`,
+        key: `${row.asset}-outgoing`,
+        asset: row.asset,
+        direction: 'outgoing',
+        direction_label: 'Ушло',
+        value: metric === 'count' ? row.tx_count_out : row.volume_out,
+        amount: row.volume_out,
+        tx_count: row.tx_count_out,
+        network_label: row.network_label,
+      });
+    }
+    return items;
+  });
 }
 
 function dirBadge(dir) {
@@ -343,9 +754,218 @@ function copyAddr(addr) {
   navigator.clipboard.writeText(addr).then(() => toast('Адрес скопирован в буфер'));
 }
 
+function getWalletById(id) {
+  return MOCK.wallets.find(w => w.id === id);
+}
+
+function getTransactionByHash(hash) {
+  return MOCK.transactions.find(tx => tx.tx_hash === hash);
+}
+
+function openAddTransaction() {
+  state.txDraftHash = null;
+  state.modal = 'txForm';
+  rerender();
+}
+
+function openEditTransaction(hash) {
+  state.txDraftHash = hash;
+  state.modal = 'txForm';
+  rerender();
+}
+
+function openTransactionDetails(hash) {
+  state.txDetailHash = hash;
+  state.modal = 'txDetails';
+  rerender();
+}
+
+function closeActiveModal() {
+  state.modal = null;
+  state.txDraftHash = null;
+  state.txDetailHash = null;
+  rerender();
+}
+
+const TRONSCAN_TX_INFO_URL = 'https://apilist.tronscan.org/api/transaction-info?hash=';
+
+function inferDirection(wallet, tx, fallbackDirection) {
+  const walletAddress = (wallet?.address || '').toLowerCase();
+  const from = (tx.from_address || '').toLowerCase();
+  const to = (tx.to_address || '').toLowerCase();
+  if (walletAddress && from === walletAddress) return 'outgoing';
+  if (walletAddress && to === walletAddress) return 'incoming';
+  return fallbackDirection || tx.direction || 'incoming';
+}
+
+function fromSun(value) {
+  const num = Number(value || 0) / 1_000_000;
+  return Number.isInteger(num) ? String(num) : String(Number(num.toFixed(6)));
+}
+
+function fmtPlain(n, dec=6) {
+  const num = Number(n);
+  if (!Number.isFinite(num)) return '—';
+  return num.toLocaleString('en-US', { maximumFractionDigits: dec });
+}
+
+function parseTronscanTransaction(raw, hash, wallet, preferredDirection) {
+  const contractData = raw.contractData || {};
+  const trigger = raw.trigger_info || {};
+  const triggerParams = trigger.parameter || {};
+  const tokenTransfer = raw.tokenTransferInfo || raw.trc20TransferInfo?.[0] || raw.transfersAllList?.[0] || {};
+  const contractAddress = tokenTransfer.contract_address || contractData.contract_address || trigger.contract_address || '';
+  const isNativeTrx = Number(raw.contractType) === 1 && !contractAddress;
+  const isResourceReclaim = Number(raw.contractType) === 58;
+  const decimals = Number(tokenTransfer.decimals || raw.tokenInfo?.tokenDecimal || 6);
+  const from = tokenTransfer.from_address || raw.ownerAddress || contractData.owner_address || '';
+  const to = isResourceReclaim
+    ? (contractData.receiver_address || raw.toAddress || '')
+    : (tokenTransfer.to_address || triggerParams._to || contractData.to_address || raw.toAddress || '');
+  const rawAmount = isResourceReclaim
+    ? contractData.balance
+    : isNativeTrx
+    ? contractData.amount
+    : (tokenTransfer.amount_str || triggerParams._value || contractData.amount || raw.amount || 0);
+  const amount = (isNativeTrx || isResourceReclaim)
+    ? fromSun(rawAmount)
+    : String(Number(rawAmount || 0) / Math.pow(10, decimals));
+  const asset = (isNativeTrx || isResourceReclaim)
+    ? 'TRX'
+    : (tokenTransfer.symbol || raw.tokenInfo?.tokenAbbr || raw.contractInfo?.[contractAddress]?.tag1?.replace(' Token', '') || 'TRC20');
+  const feeSun = Number(raw.cost?.fee || raw.cost?.energy_fee || raw.cost?.net_fee || 0);
+  const energyUsage = Number(raw.cost?.energy_usage_total || raw.cost?.energy_usage || 0);
+  const resourcesBase = feeSun > 0
+    ? `${fromSun(feeSun)} TRX`
+    : `${raw.cost?.net_usage || 0} Bandwidth`;
+  const resources = energyUsage > 0
+    ? `${resourcesBase} · ${fmtPlain(energyUsage, 0)} Energy`
+    : resourcesBase;
+  const nativeAmount = isNativeTrx ? amount : fromSun(raw.amount || trigger.call_value || 0);
+  const parsed = {
+    wallet_id: wallet.id,
+    tx_hash: raw.hash || hash.trim(),
+    timestamp: raw.timestamp ? new Date(raw.timestamp).toISOString() : new Date().toISOString(),
+    block_number: raw.block || '',
+    result: raw.contractRet === 'SUCCESS' ? 'SUCCESSFUL' : (raw.contractRet || 'UNKNOWN'),
+    status: raw.confirmed ? 'CONFIRMED' : 'PENDING',
+    confirmations: raw.confirmations ? `Confirmed by ${raw.confirmations} blocks` : '',
+    resources_fee: resources,
+    from_address: from,
+    to_address: to,
+    amount,
+    asset,
+    native_amount: nativeAmount,
+    native_asset: 'TRX',
+    usd_value: '',
+    network: 'tron',
+    is_error: raw.contractRet && raw.contractRet !== 'SUCCESS',
+    owner_address: from,
+    contract_address: contractAddress,
+    token_from: from,
+    token_to: to,
+    token_amount: amount,
+    token_symbol: asset,
+    tx_type: isResourceReclaim ? 'resource_reclaim' : 'transfer',
+    resource_type: contractData.resource || '',
+    resource_value: contractData.resourceValue || '',
+    staked_asset_released: isResourceReclaim ? amount : '',
+    signature_addresses: raw.signature_addresses || [],
+    method: isResourceReclaim ? 'reclaim resources' : (trigger.method || (contractAddress ? 'transfer()' : 'native transfer')),
+    method_id: trigger.methodId || (contractData.data ? contractData.data.slice(0, 8) : ''),
+    input_data: contractData.data || trigger.data || '',
+  };
+  parsed.direction = inferDirection(wallet, parsed, preferredDirection);
+  return parsed;
+}
+
+async function lookupExplorerTx(hash, walletId, preferredDirection) {
+  const wallet = getWalletById(walletId);
+  if (!wallet) throw new Error('Кошелёк не найден');
+
+  if (wallet.network === 'tron') {
+    const response = await fetch(`${TRONSCAN_TX_INFO_URL}${encodeURIComponent(hash.trim())}`);
+    if (!response.ok) throw new Error(`Tronscan вернул HTTP ${response.status}`);
+    const raw = await response.json();
+    if (!raw || !raw.hash) throw new Error('Tronscan не нашёл транзакцию по этому hash');
+
+    const tx = parseTronscanTransaction(raw, hash, wallet, preferredDirection);
+    const walletAddress = wallet.address.toLowerCase();
+    if (tx.from_address.toLowerCase() !== walletAddress && tx.to_address.toLowerCase() !== walletAddress) {
+      throw new Error('Эта транзакция не относится к выбранному кошельку');
+    }
+    return tx;
+  }
+
+  throw new Error('Реальный lookup сейчас подключён для TRON. Для ETH/BTC нужен backend endpoint с API-ключами.');
+}
+
+async function fillTransactionFromHash() {
+  const hash = document.getElementById('txHash')?.value.trim();
+  const walletId = document.getElementById('txWallet')?.value;
+  if (!hash || !walletId) {
+    toast('Выберите кошелёк и вставьте hash транзакции', 'error');
+    return;
+  }
+
+  const preferredDirection = document.getElementById('txDirection')?.value || 'incoming';
+  const button = document.getElementById('txLookupBtn');
+  try {
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Запрос...';
+    }
+    toast('Запрашиваю данные в Tronscan…');
+    const tx = await lookupExplorerTx(hash, walletId, preferredDirection);
+    setTransactionFormValues(tx);
+    toast('Данные по hash заполнены из Tronscan');
+  } catch (e) {
+    toast(e.message || 'Не удалось получить данные по hash', 'error');
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = 'Заполнить по hash';
+    }
+  }
+}
+
+function setTransactionFormValues(tx) {
+  const map = {
+    txTimestamp: toUtcInputValue(tx.timestamp),
+    txFrom: tx.from_address || '',
+    txTo: tx.to_address || '',
+    txAmount: tx.amount || '',
+    txAsset: tx.asset || '',
+    txDirection: tx.direction || 'incoming',
+    txUsd: tx.usd_value || '',
+    txOwner: tx.owner_address || '',
+    txContract: tx.contract_address || '',
+    txMethod: tx.method || '',
+    txMethodId: tx.method_id || '',
+    txInput: tx.input_data || '',
+    txBlock: tx.block_number || '',
+    txResult: tx.result || '',
+    txStatus: tx.status || '',
+    txConfirmations: tx.confirmations || '',
+    txResources: tx.resources_fee || '',
+    txType: tx.tx_type || 'transfer',
+    txResourceType: tx.resource_type || '',
+    txResourceValue: tx.resource_value || '',
+    txStakedReleased: tx.staked_asset_released || '',
+    txSignatures: (tx.signature_addresses || []).join(','),
+    txNativeAmount: tx.native_amount || '',
+    txNativeAsset: tx.native_asset || 'TRX',
+  };
+  Object.entries(map).forEach(([id, value]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = value;
+  });
+}
+
 // ─── Render Functions ─────────────────────────────────────────────────────────
 
 function renderLogin() {
+  const errorClass = state.loginError ? 'login-error show' : 'login-error';
   return `
   <div class="login-page">
     <div class="login-card">
@@ -354,15 +974,18 @@ function renderLogin() {
         <div class="login-title">КриптоМонитор</div>
         <div class="login-sub">Агрегатор блокчейн кошельков</div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Эл. почта</label>
-        <input class="form-input" type="email" id="loginEmail" placeholder="admin@company.com" value="admin@company.com"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Пароль</label>
-        <input class="form-input" type="password" id="loginPass" placeholder="••••••••" value="password123"/>
-      </div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="doLogin()">Войти →</button>
+      <form onsubmit="doLogin(event)" novalidate>
+        <div class="form-group">
+          <label class="form-label">Эл. почта</label>
+          <input class="form-input" type="email" id="loginEmail" placeholder="admin@company.com" value="admin@company.com" autocomplete="username" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Пароль</label>
+          <input class="form-input" type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" required/>
+        </div>
+        <div class="${errorClass}" id="loginError">${state.loginError}</div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" type="submit">Войти →</button>
+      </form>
     </div>
   </div>`;
 }
@@ -576,7 +1199,8 @@ function renderWallets() {
               <td style="color:var(--text3);font-size:12px">${fmtDate(w.last_sync)}</td>
               <td>
                 <div style="display:flex;gap:6px">
-                  <button class="btn btn-ghost btn-sm" onclick="state.analyticsFilter.walletId='${w.id}';navigate('analytics')">Аналитика</button>
+                  <button class="btn btn-ghost btn-sm" onclick="state.txFilters.walletId='${w.id}';state.txFilters.direction='all';navigate('transactions')">Транзакции</button>
+                  <button class="btn btn-ghost btn-sm" onclick="state.analyticsFilter.walletId='${w.id}';state.analyticsFilter.asset='all';navigate('analytics')">Аналитика</button>
                   <button class="btn btn-ghost btn-sm" onclick="triggerSync('${w.id}','${w.address}')">↺</button>
                   <button class="btn btn-ghost btn-sm btn-danger" onclick="removeWallet('${w.id}')">✕</button>
                 </div>
@@ -635,27 +1259,33 @@ function renderWallets() {
 }
 
 function renderTransactions() {
-  const walletOptions = MOCK.wallets.map(w => `<option value="${w.id}">${shortAddr(w.address)} — ${w.label||w.network}</option>`).join('');
-  const filtered = state.txFilters.walletId
-    ? MOCK.transactions.filter(t => {
-        const wallet = MOCK.wallets.find(w => w.id === state.txFilters.walletId);
-        return wallet && t.network === wallet.network;
-      })
-    : MOCK.transactions;
+  const walletOptions = MOCK.wallets.map(w => {
+    const selected = state.txFilters.walletId === w.id ? 'selected' : '';
+    return `<option value="${w.id}" ${selected}>${walletDisplayName(w)} (${w.network.toUpperCase()})</option>`;
+  }).join('');
+  const filtered = MOCK.transactions.filter(tx => {
+    const byWallet = !state.txFilters.walletId || tx.wallet_id === state.txFilters.walletId;
+    const byDirection = state.txFilters.direction === 'all' || tx.direction === state.txFilters.direction;
+    return byWallet && byDirection;
+  });
+
+  const txModal = renderTransactionModal();
+  const txDetails = renderTransactionDetailsModal();
 
   return `
   <div class="topbar">
     <div class="page-title">Транзакции</div>
     <div class="topbar-actions">
-      <select class="filter-select" onchange="state.txFilters.walletId=this.value||null;rerender()">
-        <option value="">Все кошельки</option>
+      <select class="filter-select" onchange="state.txFilters.walletId=this.value||null;state.txFilters.page=1;rerender()">
+        <option value="" ${!state.txFilters.walletId?'selected':''}>Все кошельки</option>
         ${walletOptions}
       </select>
-      <select class="filter-select" onchange="state.txFilters.direction=this.value;rerender()">
-        <option value="all">Все направления</option>
-        <option value="incoming">Входящие</option>
-        <option value="outgoing">Исходящие</option>
+      <select class="filter-select" onchange="state.txFilters.direction=this.value;state.txFilters.page=1;rerender()">
+        <option value="all" ${state.txFilters.direction==='all'?'selected':''}>Все направления</option>
+        <option value="incoming" ${state.txFilters.direction==='incoming'?'selected':''}>Входящие</option>
+        <option value="outgoing" ${state.txFilters.direction==='outgoing'?'selected':''}>Исходящие</option>
       </select>
+      <button class="btn btn-primary btn-sm" onclick="openAddTransaction()">+ Добавить транзакцию</button>
       <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ Скачать CSV</button>
     </div>
   </div>
@@ -667,21 +1297,34 @@ function renderTransactions() {
       <div class="table-wrap">
         <table>
           <thead><tr>
-            <th>Хэш</th><th>Время</th><th>Отправитель</th><th>Получатель</th><th>Сумма</th><th>Актив</th><th>Направление</th><th>USD</th><th>Сеть</th>
+            <th>Хэш</th><th>Время</th><th>Кошелёк</th><th>Отправитель</th><th>Получатель</th><th>Сумма</th><th>Актив</th><th>Направление</th><th>USD</th><th>Сеть</th><th></th>
           </tr></thead>
           <tbody>
-            ${filtered.map(tx => `
-            <tr>
-              <td><span class="addr addr-short mono" onclick="copyAddr('${tx.tx_hash}')" data-tip="${tx.tx_hash}">${tx.tx_hash.slice(0,12)}…</span></td>
+            ${filtered.map(tx => {
+              const wallet = MOCK.wallets.find(w => w.id === tx.wallet_id);
+              return `
+            <tr class="tx-row" onclick="openTransactionDetails('${tx.tx_hash}')">
+              <td><span class="addr addr-short mono" onclick="event.stopPropagation();copyAddr('${tx.tx_hash}')" data-tip="${tx.tx_hash}">${tx.tx_hash.slice(0,12)}…</span></td>
               <td style="font-size:12px;color:var(--text2)">${fmtDate(tx.timestamp)}</td>
-              <td><span class="addr mono" onclick="copyAddr('${tx.from_address}')">${tx.from_address.slice(0,10)}…</span></td>
-              <td><span class="addr mono" onclick="copyAddr('${tx.to_address}')">${tx.to_address.slice(0,10)}…</span></td>
+              <td>
+                <div style="font-weight:600;color:var(--text)">${walletDisplayName(wallet)}</div>
+                <div class="addr mono" style="font-size:11px">${wallet ? shortAddr(wallet.address) : '—'}</div>
+              </td>
+              <td><span class="addr mono" onclick="event.stopPropagation();copyAddr('${tx.from_address}')">${tx.from_address.slice(0,10)}…</span></td>
+              <td><span class="addr mono" onclick="event.stopPropagation();copyAddr('${tx.to_address}')">${tx.to_address.slice(0,10)}…</span></td>
               <td class="mono" style="font-weight:500">${parseFloat(tx.amount).toFixed(6)}</td>
               <td><span style="font-weight:600;color:var(--text)">${tx.asset}</span></td>
               <td>${dirBadge(tx.direction)}</td>
-              <td style="color:var(--text2)">$${parseFloat(tx.usd_value||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+              <td style="color:var(--text2)">${fmtUsd(tx.usd_value)}</td>
               <td>${netBadge(tx.network)}</td>
-            </tr>`).join('')}
+              <td>
+                <div class="tx-actions">
+                  <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditTransaction('${tx.tx_hash}')">Изм.</button>
+                  <button class="btn btn-ghost btn-sm btn-danger" onclick="event.stopPropagation();removeTransaction('${tx.tx_hash}')">✕</button>
+                </div>
+              </td>
+            </tr>`;
+            }).join('')}
           </tbody>
         </table>
       </div>
@@ -694,65 +1337,317 @@ function renderTransactions() {
         </div>
       </div>
     </div>
+  </div>
+  ${txModal}
+  ${txDetails}`;
+}
+
+function renderTransactionModal() {
+  const editing = state.txDraftHash ? getTransactionByHash(state.txDraftHash) : null;
+  const selectedWalletId = editing?.wallet_id || state.txFilters.walletId || MOCK.wallets[0]?.id || '';
+  const walletOptions = MOCK.wallets.map(w => `<option value="${w.id}" ${selectedWalletId===w.id?'selected':''}>${walletDisplayName(w)} (${w.network.toUpperCase()})</option>`).join('');
+  return `
+  <div class="modal-overlay ${state.modal === 'txForm' ? 'open' : ''}" onclick="closeModal(event)">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <div class="modal-title">${editing ? 'Редактировать транзакцию' : 'Добавить транзакцию'}</div>
+        <button class="btn-icon" onclick="closeActiveModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Кошелёк</label>
+            <select class="form-select" id="txWallet">${walletOptions}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hash транзакции</label>
+            <input class="form-input" id="txHash" value="${editing?.tx_hash || ''}" ${editing ? 'disabled' : ''} placeholder="0x… / tron hash…" autocomplete="off"/>
+            <input type="hidden" id="txBlock" value="${editing?.block_number || ''}"/>
+            <input type="hidden" id="txResult" value="${editing?.result || ''}"/>
+            <input type="hidden" id="txStatus" value="${editing?.status || ''}"/>
+            <input type="hidden" id="txConfirmations" value="${editing?.confirmations || ''}"/>
+            <input type="hidden" id="txResources" value="${editing?.resources_fee || ''}"/>
+            <input type="hidden" id="txType" value="${editing?.tx_type || 'transfer'}"/>
+            <input type="hidden" id="txResourceType" value="${editing?.resource_type || ''}"/>
+            <input type="hidden" id="txResourceValue" value="${editing?.resource_value || ''}"/>
+            <input type="hidden" id="txStakedReleased" value="${editing?.staked_asset_released || ''}"/>
+            <input type="hidden" id="txSignatures" value="${(editing?.signature_addresses || []).join(',')}"/>
+            <input type="hidden" id="txNativeAmount" value="${editing?.native_amount || ''}"/>
+            <input type="hidden" id="txNativeAsset" value="${editing?.native_asset || 'TRX'}"/>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="txLookupBtn" style="margin-bottom:18px" onclick="fillTransactionFromHash()">Заполнить по hash</button>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Время</label>
+            <input class="form-input" type="datetime-local" id="txTimestamp" value="${toUtcInputValue(editing?.timestamp)}" style="font-family:var(--font)"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Направление</label>
+            <select class="form-select" id="txDirection">
+              <option value="incoming" ${editing?.direction==='incoming'?'selected':''}>Пришло</option>
+              <option value="outgoing" ${editing?.direction==='outgoing'?'selected':''}>Ушло</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">From</label>
+            <input class="form-input" id="txFrom" value="${editing?.from_address || ''}" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">To</label>
+            <input class="form-input" id="txTo" value="${editing?.to_address || ''}" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount</label>
+            <input class="form-input" id="txAmount" value="${editing?.amount || ''}" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Asset</label>
+            <input class="form-input" id="txAsset" value="${editing?.asset || ''}" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">USD</label>
+            <input class="form-input" id="txUsd" value="${editing?.usd_value || ''}" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Owner Address</label>
+            <input class="form-input" id="txOwner" value="${editing?.owner_address || ''}" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contract Address</label>
+            <input class="form-input" id="txContract" value="${editing?.contract_address || ''}" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Method</label>
+            <input class="form-input" id="txMethod" value="${editing?.method || ''}" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Method ID</label>
+            <input class="form-input" id="txMethodId" value="${editing?.method_id || ''}" autocomplete="off"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Input / параметры вызова</label>
+          <input class="form-input" id="txInput" value="${editing?.input_data || ''}" autocomplete="off"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeActiveModal()">Отмена</button>
+        <button class="btn btn-primary" onclick="submitTransaction()">${editing ? 'Сохранить' : 'Добавить'}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderTransactionDetailsModal() {
+  const tx = state.txDetailHash ? getTransactionByHash(state.txDetailHash) : null;
+  const wallet = tx ? getWalletById(tx.wallet_id) : null;
+  if (!tx) return '';
+  const isResourceReclaim = tx.tx_type === 'resource_reclaim';
+  const operationValue = isResourceReclaim
+    ? `
+      <div class="detail-label">Owner Address</div><div class="detail-value mono">${tx.owner_address || '—'}</div>
+      <div class="detail-label">Resources Taken From</div><div class="detail-value mono">${tx.to_address || '—'}</div>
+      <div class="detail-label">Staked Asset Released</div><div class="detail-value">${fmtPlain(tx.staked_asset_released || tx.amount)} TRX</div>
+      <div class="detail-label">Reclaimed Resources</div><div class="detail-value">${fmtPlain(tx.resource_value, 2)} ${tx.resource_type || '—'}</div>
+      <div class="detail-label">Signature List</div><div class="detail-value mono">${(tx.signature_addresses || []).join('<br/>') || '—'}</div>
+    `
+    : `
+      <div class="detail-label">Owner Address</div><div class="detail-value mono">${tx.owner_address || '—'}</div>
+      <div class="detail-label">Contract Address</div><div class="detail-value mono">${tx.contract_address || '—'}</div>
+      <div class="detail-label">Token Transfers</div><div class="detail-value">From <span class="mono">${tx.token_from || tx.from_address}</span><br/>To <span class="mono">${tx.token_to || tx.to_address}</span><br/><strong>${tx.token_amount || tx.amount} ${tx.token_symbol || tx.asset}</strong></div>
+      <div class="detail-label">Amount</div><div class="detail-value">${tx.native_amount || tx.amount} ${tx.native_asset || tx.asset}</div>
+    `;
+  const methodValue = isResourceReclaim
+    ? ''
+    : `<div class="detail-label">Method Calling</div><div class="detail-value">${tx.method || '—'}<br/>Method ID: <span class="mono">${tx.method_id || '—'}</span><br/><span class="mono">${tx.input_data || '—'}</span></div>`;
+  return `
+  <div class="modal-overlay ${state.modal === 'txDetails' ? 'open' : ''}" onclick="closeModal(event)">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Детали транзакции</div>
+          <div class="addr mono" style="margin-top:4px">${tx.tx_hash}</div>
+        </div>
+        <button class="btn-icon" onclick="closeActiveModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid">
+          <div class="detail-label">Кошелёк</div><div class="detail-value">${walletDisplayName(wallet)} ${wallet ? `(${wallet.network.toUpperCase()})` : ''}</div>
+          <div class="detail-label">Result</div><div class="detail-value">${tx.result || (tx.is_error ? 'ERROR' : 'SUCCESSFUL')}</div>
+          <div class="detail-label">Status</div><div class="detail-value">${tx.status || (tx.is_error ? 'Ошибка' : 'CONFIRMED')} · ${tx.direction === 'incoming' ? 'Пришло' : 'Ушло'}${tx.confirmations ? ` · ${tx.confirmations}` : ''}</div>
+          <div class="detail-label">Block</div><div class="detail-value">${tx.block_number || '—'}</div>
+          <div class="detail-label">Время</div><div class="detail-value">${fmtDate(tx.timestamp)}</div>
+          ${operationValue}
+          <div class="detail-label">Resources & Fee</div><div class="detail-value">${tx.resources_fee || '—'}</div>
+          <div class="detail-label">USD</div><div class="detail-value">${fmtUsd(tx.usd_value)}</div>
+          ${methodValue}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="openEditTransaction('${tx.tx_hash}')">Редактировать</button>
+        <button class="btn btn-danger" onclick="removeTransaction('${tx.tx_hash}')">Удалить</button>
+      </div>
+    </div>
   </div>`;
 }
 
 function renderAnalytics() {
-  const walletOptions = MOCK.wallets.map(w => `<option value="${w.id}" ${state.analyticsFilter.walletId===w.id?'selected':''}>${shortAddr(w.address)} — ${w.label||w.network}</option>`).join('');
-  const data = MOCK.monthly.filter(m => m.year === state.analyticsFilter.year);
-
-  // Group by asset
-  const assets = [...new Set(data.map(d => d.asset))];
+  const walletOptions = MOCK.wallets.map(w => `<option value="${w.id}" ${state.analyticsFilter.walletId===w.id?'selected':''}>${walletDisplayName(w)} (${w.network.toUpperCase()})</option>`).join('');
+  const assetOptions = getAnalyticsAssetOptions(state.analyticsFilter.walletId, state.analyticsFilter.year);
+  const selectedAsset = assetOptions.includes(state.analyticsFilter.asset) ? state.analyticsFilter.asset : 'all';
+  const range = getAnalyticsDateRange(state.analyticsFilter.year);
+  const group = ['tx', 'day', 'month'].includes(state.analyticsFilter.group) ? state.analyticsFilter.group : 'tx';
+  const tableGroup = group === 'month' ? 'month' : 'day';
+  const metric = state.analyticsFilter.metric === 'amount' ? 'amount' : 'count';
+  const data = getAnalyticsRows(state.analyticsFilter.walletId, state.analyticsFilter.year, selectedAsset, tableGroup);
+  const totals = getAnalyticsAssetTotals(state.analyticsFilter.walletId, state.analyticsFilter.year, selectedAsset);
+  const summary = getAnalyticsSummary(state.analyticsFilter.walletId, state.analyticsFilter.year, selectedAsset);
+  const maxVol = Math.max(1, ...data.map(d => Number(d.volume_total || 0)));
+  const assetChips = summary.assets.length
+    ? summary.assets.map(asset => `<span class="asset-chip">${asset}</span>`).join(' ')
+    : '<span style="color:var(--text3)">—</span>';
+  const flowCards = totals.length ? totals.map(row => {
+    const netPositive = Number(row.net_flow) >= 0;
+    return `
+      <div class="flow-card">
+        <div class="flow-card-head">
+          <span class="asset-chip">${row.asset}</span>
+          <span class="flow-period">${row.asset_type} · ${row.network_label}</span>
+        </div>
+        <div class="flow-net" style="color:${netPositive ? 'var(--green)' : 'var(--red)'}">${netPositive ? '+' : ''}${fmt(row.net_flow, 4)} ${row.asset}</div>
+        <div class="flow-stats">
+          <div>
+            <div class="flow-stat-label">Пришло</div>
+            <div class="flow-stat-value" style="color:var(--green)">${fmt(row.volume_in, 4)}</div>
+          </div>
+          <div>
+            <div class="flow-stat-label">Ушло</div>
+            <div class="flow-stat-value" style="color:var(--red)">${fmt(row.volume_out, 4)}</div>
+          </div>
+        </div>
+        <div class="flow-tx">${row.tx_count_total} транзакц. · входящих ${row.tx_count_in} / исходящих ${row.tx_count_out}</div>
+      </div>`;
+  }).join('') : '';
+  const groupLabel = group === 'tx' ? 'отдельные транзакции' : group === 'day' ? 'по дням' : 'по месяцам';
+  const metricLabel = metric === 'count' ? 'количество' : 'сумма';
+  const tableTitle = tableGroup === 'day' ? 'Сводка по дням' : 'Сводка по месяцам';
 
   return `
   <div class="topbar">
     <div class="page-title">Аналитика</div>
     <div class="topbar-actions">
-      <select class="filter-select" onchange="state.analyticsFilter.walletId=this.value||null;rerender()">
-        <option value="">Все кошельки</option>
+      <select class="filter-select" onchange="state.analyticsFilter.walletId=this.value||null;state.analyticsFilter.asset='all';rerender()">
+        <option value="" ${!state.analyticsFilter.walletId?'selected':''}>Все кошельки</option>
         ${walletOptions}
       </select>
-      <select class="filter-select" onchange="state.analyticsFilter.year=parseInt(this.value);rerender()">
+      <select class="filter-select" onchange="state.analyticsFilter.asset=this.value;rerender()">
+        <option value="all" ${selectedAsset==='all'?'selected':''}>Все активы</option>
+        ${assetOptions.map(asset => `<option value="${asset}" ${selectedAsset===asset?'selected':''}>${asset}</option>`).join('')}
+      </select>
+      <select class="filter-select" onchange="setAnalyticsYear(parseInt(this.value))">
         <option value="2026" ${state.analyticsFilter.year===2026?'selected':''}>2026</option>
         <option value="2025" ${state.analyticsFilter.year===2025?'selected':''}>2025</option>
       </select>
     </div>
   </div>
-  <div class="content">
+  <div class="content content-narrow">
 
-    <!-- Volume chart -->
-    <div class="card" style="margin-bottom:16px">
-      <div class="card-header">
-        <div class="card-title">Объём по месяцам и активам — ${state.analyticsFilter.year}</div>
-        <div style="font-size:12px;color:var(--text3)">volume_in + volume_out = volume_total (валовый оборот)</div>
+    <div class="analytics-controls">
+      <div class="analytics-control">
+        <label>Дата от</label>
+        <input class="form-input" type="date" value="${range.fromValue}" onchange="setAnalyticsDateFilter('dateFrom', this.value)"/>
       </div>
-      <div class="card-body">
-        <div class="chart-wrap" style="height:260px"><canvas id="analyticsChart"></canvas></div>
+      <div class="analytics-control">
+        <label>Дата до</label>
+        <input class="form-input" type="date" value="${range.toValue}" onchange="setAnalyticsDateFilter('dateTo', this.value)"/>
+      </div>
+      <div class="analytics-control">
+        <label>График</label>
+        <select class="form-select" onchange="state.analyticsFilter.group=this.value;rerender()">
+          <option value="tx" ${group==='tx'?'selected':''}>По транзакциям</option>
+          <option value="day" ${group==='day'?'selected':''}>По дням</option>
+          <option value="month" ${group==='month'?'selected':''}>По месяцам</option>
+        </select>
+      </div>
+      <div class="analytics-control">
+        <label>Значение</label>
+        <select class="form-select" onchange="state.analyticsFilter.metric=this.value;rerender()">
+          <option value="count" ${metric==='count'?'selected':''}>Количество</option>
+          <option value="amount" ${metric==='amount'?'selected':''}>Сумма</option>
+        </select>
+      </div>
+      <div class="analytics-buttons">
+        <button class="btn btn-ghost btn-sm" onclick="setAnalyticsPreset(7)">7д</button>
+        <button class="btn btn-ghost btn-sm" onclick="setAnalyticsPreset(30)">30д</button>
+        <button class="btn btn-ghost btn-sm" onclick="setAnalyticsPreset('year')">Год</button>
+      </div>
+      <div class="analytics-buttons">
+        <button class="btn btn-ghost btn-sm" onclick="shiftAnalyticsRange(-1)">←</button>
+        <button class="btn btn-ghost btn-sm" onclick="shiftAnalyticsRange(1)">→</button>
+      </div>
+      <div class="analytics-buttons">
+        <button class="btn btn-ghost btn-sm" onclick="zoomAnalyticsRange(1.8)">−</button>
+        <button class="btn btn-ghost btn-sm" onclick="zoomAnalyticsRange(0.55)">+</button>
       </div>
     </div>
 
-    <!-- Monthly table -->
+    <div class="analytics-summary">
+      <div class="analytics-metric">
+        <div class="metric-label">Активы в обороте</div>
+        <div class="metric-value">${summary.assets.length}</div>
+        <div class="metric-sub">${assetChips}</div>
+      </div>
+      <div class="analytics-metric">
+        <div class="metric-label">Пришло</div>
+        <div class="metric-value" style="color:var(--green)">${summary.incomingTx}</div>
+        <div class="metric-sub">входящих транзакций</div>
+      </div>
+      <div class="analytics-metric">
+        <div class="metric-label">Ушло</div>
+        <div class="metric-value" style="color:var(--red)">${summary.outgoingTx}</div>
+        <div class="metric-sub">исходящих транзакций</div>
+      </div>
+      <div class="analytics-metric">
+        <div class="metric-label">Комиссии сети</div>
+        <div class="metric-value">${fmt(summary.feesTrx, 4)} TRX</div>
+        <div class="metric-sub">${summary.serviceTx} ресурсных/нулевых операций вне оборота</div>
+      </div>
+    </div>
+
+    ${flowCards ? `<div class="asset-flow-grid">${flowCards}</div>` : ''}
+
+    <div class="card analytics-chart-card">
+      <div class="card-header">
+        <div class="card-title">График транзакций</div>
+        <div style="font-size:12px;color:var(--text3)">${groupLabel} · ${metricLabel}</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap analytics-chart-wrap"><canvas id="analyticsChart"></canvas></div>
+      </div>
+    </div>
+
     <div class="card">
-      <div class="card-header"><div class="card-title">Детализация по месяцам</div></div>
+      <div class="card-header"><div class="card-title">${tableTitle} по активам</div></div>
       <div class="table-wrap">
         <table>
           <thead><tr>
-            <th>Период</th><th>Актив</th>
-            <th data-tip="Σ входящих транзакций">Volume IN</th>
-            <th data-tip="Σ исходящих транзакций">Volume OUT</th>
-            <th data-tip="IN + OUT (валовый оборот)">Total Volume</th>
-            <th data-tip="IN − OUT (положительное = нетто получатель)">Net Flow</th>
-            <th>TX In</th><th>TX Out</th><th>TX Total</th>
+            <th>Период</th><th>Актив</th><th>Тип</th>
+            <th>Пришло</th>
+            <th>Ушло</th>
+            <th>Оборот</th>
+            <th>Чистый поток</th>
+            <th>Входящие</th><th>Исходящие</th><th>Всего</th>
           </tr></thead>
           <tbody>
-            ${data.sort((a,b) => b.month - a.month || a.asset.localeCompare(b.asset)).map(row => {
-              const maxVol = Math.max(...data.map(d => parseFloat(d.volume_total)));
-              const pct = Math.round(parseFloat(row.volume_total) / maxVol * 100);
+            ${data.length ? data.map(row => {
+              const pct = Math.round(Number(row.volume_total || 0) / maxVol * 100);
               const netPositive = parseFloat(row.net_flow) >= 0;
               return `
               <tr>
-                <td style="font-weight:600">${monthName(row.month)} ${row.year}</td>
-                <td><span style="font-weight:700;font-size:13px">${row.asset}</span></td>
+                <td style="font-weight:600">${row.period_label}</td>
+                <td><span class="asset-chip">${row.asset}</span></td>
+                <td style="color:var(--text2)">${row.asset_type}</td>
                 <td>
                   <div class="vol-bar-wrap">
                     <div class="vol-bar-bg"><div class="vol-bar-fill vol-bar-in" style="width:${pct}%"></div></div>
@@ -773,7 +1668,11 @@ function renderAnalytics() {
                 <td style="color:var(--red)">${row.tx_count_out}</td>
                 <td style="color:var(--text2)">${row.tx_count_total}</td>
               </tr>`;
-            }).join('')}
+            }).join('') : `
+              <tr>
+                <td colspan="10" style="text-align:center;color:var(--text3);padding:28px">Нет переводов с положительной суммой для выбранного фильтра</td>
+              </tr>
+            `}
           </tbody>
         </table>
       </div>
@@ -917,6 +1816,13 @@ function renderSettings() {
         <button class="btn btn-primary">Сохранить расписание</button>
       </div>
     </div>
+    <div class="card" style="max-width:600px;margin-top:16px">
+      <div class="card-header"><div class="card-title">Тестовые данные</div></div>
+      <div class="card-body">
+        <div class="form-hint" style="margin-bottom:14px">Кошельки и транзакции временно сохраняются в localStorage этого браузера.</div>
+        <button class="btn btn-danger" onclick="resetTestData()">Сбросить тестовые данные</button>
+      </div>
+    </div>
   </div>`;
 }
 
@@ -940,8 +1846,8 @@ function initCharts() {
       data: {
         labels: ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'],
         datasets: [
-          { label: 'Volume IN', data: [8200, 11500, 6800, 9100, 14800, 6250], backgroundColor: 'rgba(34,211,165,0.6)', borderRadius: 4 },
-          { label: 'Volume OUT', data: [5400, 8200, 4200, 5600, 8200, 1200], backgroundColor: 'rgba(248,113,113,0.5)', borderRadius: 4 },
+          { label: 'Volume IN', data: [8200, 11500, 6800, 9100, 14800, 6250], backgroundColor: 'rgba(34,211,165,0.52)', borderRadius: 6, maxBarThickness: 46 },
+          { label: 'Volume OUT', data: [5400, 8200, 4200, 5600, 8200, 1200], backgroundColor: 'rgba(248,113,113,0.44)', borderRadius: 6, maxBarThickness: 46 },
         ]
       },
       options: {
@@ -975,24 +1881,100 @@ function initCharts() {
   // Analytics chart
   const ac = document.getElementById('analyticsChart');
   if (ac) {
-    const months = [...new Set(MOCK.monthly.map(m => m.month))].sort();
-    const usdtIn = months.map(m => { const r = MOCK.monthly.find(d=>d.month===m&&d.asset==='USDT'); return r ? parseFloat(r.volume_in) : 0; });
-    const usdtOut = months.map(m => { const r = MOCK.monthly.find(d=>d.month===m&&d.asset==='USDT'); return r ? parseFloat(r.volume_out) : 0; });
+    const assetOptions = getAnalyticsAssetOptions(state.analyticsFilter.walletId, state.analyticsFilter.year);
+    const selectedAsset = assetOptions.includes(state.analyticsFilter.asset) ? state.analyticsFilter.asset : 'all';
+    const group = ['tx', 'day', 'month'].includes(state.analyticsFilter.group) ? state.analyticsFilter.group : 'tx';
+    const metric = state.analyticsFilter.metric === 'amount' ? 'amount' : 'count';
+    const chartItems = getAnalyticsChartItems(state.analyticsFilter.walletId, state.analyticsFilter.year, selectedAsset, group, metric);
+    const labels = group === 'tx'
+      ? chartItems.map(item => `${item.label} · ${item.asset}`)
+      : [...new Set(chartItems.map(item => item.label))];
+    const datasetKeys = [...new Set(chartItems.map(item => item.key))].sort();
+    const palette = {
+      BTC: { in: 'rgba(247,147,26,0.54)', out: 'rgba(247,147,26,0.28)' },
+      ETH: { in: 'rgba(96,165,250,0.54)', out: 'rgba(96,165,250,0.28)' },
+      TRX: { in: 'rgba(248,113,113,0.54)', out: 'rgba(248,113,113,0.28)' },
+      USDT: { in: 'rgba(34,211,165,0.5)', out: 'rgba(248,113,113,0.42)' },
+    };
+    const itemLookup = {};
+    const datasets = datasetKeys.map(key => {
+      const splitAt = key.lastIndexOf('-');
+      const asset = key.slice(0, splitAt);
+      const direction = key.slice(splitAt + 1);
+      const colors = palette[asset] || { in: 'rgba(34,211,165,0.5)', out: 'rgba(248,113,113,0.42)' };
+      return {
+        label: `${asset} ${direction === 'incoming' ? 'IN' : 'OUT'}`,
+        analyticsKey: key,
+        data: labels.map((label, index) => {
+          const item = group === 'tx'
+            ? (chartItems[index]?.key === key ? chartItems[index] : null)
+            : chartItems.find(candidate => candidate.key === key && candidate.label === label);
+          if (item) itemLookup[`${key}-${index}`] = item;
+          return item ? item.value : null;
+        }),
+        backgroundColor: direction === 'incoming' ? colors.in : colors.out,
+        borderRadius: 6,
+        maxBarThickness: group === 'tx' ? 30 : 42,
+        categoryPercentage: group === 'tx' ? 0.72 : 0.62,
+        barPercentage: group === 'tx' ? 0.78 : 0.72,
+      };
+    });
     charts.analytics = new Chart(ac, {
       type: 'bar',
       data: {
-        labels: months.map(m => monthName(m)),
-        datasets: [
-          { label: 'USDT IN', data: usdtIn, backgroundColor: 'rgba(34,211,165,0.65)', borderRadius: 4 },
-          { label: 'USDT OUT', data: usdtOut, backgroundColor: 'rgba(248,113,113,0.55)', borderRadius: 4 },
-        ]
+        labels,
+        datasets,
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'top' } },
+        onClick: (event, elements) => {
+          if (!elements.length || group !== 'tx') return;
+          const element = elements[0];
+          const dataset = datasets[element.datasetIndex];
+          const item = itemLookup[`${dataset.analyticsKey}-${element.index}`];
+          if (item?.hash) openTransactionDetails(item.hash);
+        },
+        plugins: {
+          legend: { position: 'top', labels: { boxWidth: 10, boxHeight: 10, useBorderRadius: true } },
+          tooltip: {
+            callbacks: {
+              title: items => {
+                const ctx = items[0];
+                const dataset = datasets[ctx.datasetIndex];
+                const item = itemLookup[`${dataset.analyticsKey}-${ctx.dataIndex}`];
+                return item?.title || ctx.label;
+              },
+              label: ctx => {
+                const dataset = datasets[ctx.datasetIndex];
+                const item = itemLookup[`${dataset.analyticsKey}-${ctx.dataIndex}`];
+                if (!item) return `${ctx.dataset.label}: ${ctx.formattedValue}`;
+                if (metric === 'count') return `${item.direction_label}: ${item.tx_count || 1} транзакц. · ${fmtPlain(item.amount, 6)} ${item.asset}`;
+                return `${item.direction_label}: ${fmtPlain(item.amount, 6)} ${item.asset}`;
+              },
+              afterLabel: ctx => {
+                const dataset = datasets[ctx.datasetIndex];
+                const item = itemLookup[`${dataset.analyticsKey}-${ctx.dataIndex}`];
+                if (!item) return '';
+                const lines = [`Сеть: ${item.network_label}`];
+                if (item.wallet) lines.push(`Кошелёк: ${item.wallet}`);
+                if (item.hash) lines.push(`Hash: ${shortAddr(item.hash)}`);
+                return lines;
+              },
+            },
+          },
+        },
         scales: {
-          x: { grid: { color: 'rgba(255,255,255,0.05)' } },
-          y: { grid: { color: 'rgba(255,255,255,0.05)' }, stacked: false }
+          x: { grid: { color: 'rgba(255,255,255,0.035)' }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: group === 'tx' ? 12 : 10 } },
+          y: {
+            grid: { color: 'rgba(255,255,255,0.035)' },
+            stacked: false,
+            beginAtZero: true,
+            ticks: {
+              maxTicksLimit: 5,
+              precision: metric === 'count' ? 0 : undefined,
+              callback: value => metric === 'count' ? value : fmt(value, 2),
+            },
+          },
         }
       }
     });
@@ -1005,21 +1987,68 @@ function navigate(page) {
   rerender();
 }
 
-function doLogin() {
-  const email = document.getElementById('loginEmail').value;
-  const pass = document.getElementById('loginPass').value;
-  if (email && pass) {
-    state.user = { email, role: 'admin' };
-    state.token = 'mock-jwt-token';
-    localStorage.setItem('token', state.token);
-    toast('Добро пожаловать, Администратор!');
-    rerender();
+function createSessionToken(email) {
+  const expiresAt = Date.now() + AUTH_ACCOUNT.sessionHours * 60 * 60 * 1000;
+  return btoa(JSON.stringify({ email, role: AUTH_ACCOUNT.role, expiresAt }));
+}
+
+function readSessionToken(token) {
+  try {
+    return JSON.parse(atob(token));
+  } catch (e) {
+    return null;
   }
+}
+
+function restoreSession() {
+  const session = state.token ? readSessionToken(state.token) : null;
+  const valid = session
+    && session.email === AUTH_ACCOUNT.email
+    && session.role === AUTH_ACCOUNT.role
+    && Number(session.expiresAt) > Date.now();
+
+  if (!valid) {
+    state.user = null;
+    state.token = null;
+    localStorage.removeItem('token');
+    return false;
+  }
+
+  state.user = { email: session.email, role: session.role, name: AUTH_ACCOUNT.name };
+  return true;
+}
+
+function doLogin(event) {
+  if (event) event.preventDefault();
+
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPass').value;
+
+  if (!email || !pass) {
+    state.loginError = 'Введите эл. почту и пароль.';
+    rerender();
+    return;
+  }
+
+  if (email !== AUTH_ACCOUNT.email || pass !== AUTH_ACCOUNT.password) {
+    state.loginError = 'Неверная эл. почта или пароль.';
+    document.getElementById('loginPass').value = '';
+    rerender();
+    return;
+  }
+
+  state.loginError = '';
+  state.user = { email, role: AUTH_ACCOUNT.role, name: AUTH_ACCOUNT.name };
+  state.token = createSessionToken(email);
+  localStorage.setItem('token', state.token);
+  toast('Добро пожаловать, Администратор!');
+  rerender();
 }
 
 function doLogout() {
   state.user = null;
   state.token = null;
+  state.loginError = '';
   localStorage.removeItem('token');
   rerender();
 }
@@ -1031,8 +2060,7 @@ function openAddWallet() {
 
 function closeModal(e) {
   if (e.target.classList.contains('modal-overlay')) {
-    state.modal = null;
-    rerender();
+    closeActiveModal();
   }
 }
 
@@ -1051,6 +2079,7 @@ function submitAddWallet() {
     last_sync: null,
   });
 
+  persistData();
   state.modal = null;
   toast(`Кошелёк добавлен: ${shortAddr(address)}`);
   rerender();
@@ -1060,7 +2089,86 @@ function removeWallet(id) {
   if (!confirm('Деактивировать этот кошелёк?')) return;
   const idx = MOCK.wallets.findIndex(w => w.id === id);
   if (idx !== -1) MOCK.wallets.splice(idx, 1);
+  MOCK.transactions = MOCK.transactions.filter(tx => tx.wallet_id !== id);
+  persistData();
   toast('Кошелёк деактивирован');
+  rerender();
+}
+
+function submitTransaction() {
+  const wallet = getWalletById(document.getElementById('txWallet').value);
+  const hash = document.getElementById('txHash').value.trim();
+  if (!wallet) { toast('Выберите кошелёк', 'error'); return; }
+  if (!hash) { toast('Hash транзакции обязателен', 'error'); return; }
+
+  const tx = {
+    wallet_id: wallet.id,
+    tx_hash: hash,
+    timestamp: utcInputToIso(document.getElementById('txTimestamp').value),
+    from_address: document.getElementById('txFrom').value.trim(),
+    to_address: document.getElementById('txTo').value.trim(),
+    amount: document.getElementById('txAmount').value.trim() || '0',
+    asset: document.getElementById('txAsset').value.trim() || wallet.network.toUpperCase(),
+    direction: document.getElementById('txDirection').value,
+    usd_value: document.getElementById('txUsd').value.trim(),
+    network: wallet.network,
+    is_error: false,
+    block_number: document.getElementById('txBlock').value.trim(),
+    result: document.getElementById('txResult').value.trim(),
+    status: document.getElementById('txStatus').value.trim(),
+    confirmations: document.getElementById('txConfirmations').value.trim(),
+    resources_fee: document.getElementById('txResources').value.trim(),
+    tx_type: document.getElementById('txType').value.trim() || 'transfer',
+    resource_type: document.getElementById('txResourceType').value.trim(),
+    resource_value: document.getElementById('txResourceValue').value.trim(),
+    staked_asset_released: document.getElementById('txStakedReleased').value.trim(),
+    native_amount: document.getElementById('txNativeAmount').value.trim(),
+    native_asset: document.getElementById('txNativeAsset').value.trim() || 'TRX',
+    signature_addresses: document.getElementById('txSignatures').value.trim()
+      ? document.getElementById('txSignatures').value.split(',').map(v => v.trim()).filter(Boolean)
+      : [],
+    owner_address: document.getElementById('txOwner').value.trim(),
+    contract_address: document.getElementById('txContract').value.trim(),
+    token_from: document.getElementById('txFrom').value.trim(),
+    token_to: document.getElementById('txTo').value.trim(),
+    token_amount: document.getElementById('txAmount').value.trim() || '0',
+    token_symbol: document.getElementById('txAsset').value.trim() || wallet.network.toUpperCase(),
+    method: document.getElementById('txMethod').value.trim(),
+    method_id: document.getElementById('txMethodId').value.trim(),
+    input_data: document.getElementById('txInput').value.trim(),
+  };
+
+  const existingIndex = MOCK.transactions.findIndex(t => t.tx_hash === hash);
+  if (existingIndex !== -1 && !state.txDraftHash) {
+    toast('Такая транзакция уже есть', 'error');
+    return;
+  }
+
+  if (state.txDraftHash) {
+    const editIndex = MOCK.transactions.findIndex(t => t.tx_hash === state.txDraftHash);
+    if (editIndex !== -1) MOCK.transactions[editIndex] = tx;
+    persistData();
+    toast('Транзакция обновлена');
+  } else {
+    MOCK.transactions.unshift(tx);
+    persistData();
+    state.txFilters.walletId = wallet.id;
+    state.txFilters.direction = 'all';
+    toast('Транзакция добавлена');
+  }
+
+  closeActiveModal();
+}
+
+function removeTransaction(hash) {
+  if (!confirm('Удалить эту транзакцию?')) return;
+  const idx = MOCK.transactions.findIndex(tx => tx.tx_hash === hash);
+  if (idx !== -1) MOCK.transactions.splice(idx, 1);
+  persistData();
+  state.modal = null;
+  state.txDraftHash = null;
+  state.txDetailHash = null;
+  toast('Транзакция удалена');
   rerender();
 }
 
@@ -1091,7 +2199,10 @@ function doExport() {
 
 function doExportMonthly() {
   const headers = ['year','month','asset','volume_in','volume_out','volume_total','net_flow','tx_count_in','tx_count_out'];
-  const rows = MOCK.monthly.map(r => [r.year, r.month, r.asset, r.volume_in, r.volume_out, r.volume_total, r.net_flow, r.tx_count_in, r.tx_count_out]);
+  const assetOptions = getAnalyticsAssetOptions(state.analyticsFilter.walletId, state.analyticsFilter.year);
+  const selectedAsset = assetOptions.includes(state.analyticsFilter.asset) ? state.analyticsFilter.asset : 'all';
+  const rows = getAnalyticsRows(state.analyticsFilter.walletId, state.analyticsFilter.year, selectedAsset)
+    .map(r => [r.year, r.month, r.asset, r.volume_in, r.volume_out, r.volume_total, r.net_flow, r.tx_count_in, r.tx_count_out]);
   const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
@@ -1108,13 +2219,10 @@ function rerender() {
   destroyCharts();
   const app = document.getElementById('app');
 
-  if (!state.token && !state.user) {
+  if (!restoreSession()) {
     app.innerHTML = renderLogin();
     return;
   }
-
-  // Set default user if token exists
-  if (!state.user) state.user = { email: 'admin@company.com', role: 'admin' };
 
   const pages = {
     dashboard: renderDashboard,
