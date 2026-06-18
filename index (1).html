@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>КриптоМонитор — Агрегатор блокчейн кошельков</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0a0b0f;
+  --bg2: #12141a;
+  --bg3: #1a1d27;
+  --bg4: #22263a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8eaf0;
+  --text2: #8b90a7;
+  --text3: #555a72;
+  --accent: #6c63ff;
+  --accent2: #a78bfa;
+  --green: #22d3a5;
+  --red: #f87171;
+  --amber: #fbbf24;
+  --blue: #60a5fa;
+  --btc: #f7931a;
+  --eth: #627eea;
+  --trx: #ef0027;
+  --font: 'Space Grotesk', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.6; min-height: 100vh; overflow-x: hidden; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+/* Layout */
+.layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+.sidebar { background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.main { overflow: hidden; }
+
+/* Sidebar */
+.logo { padding: 24px 20px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+.logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.logo-text { font-weight: 700; font-size: 17px; letter-spacing: -0.3px; }
+.logo-sub { font-size: 10px; color: var(--text3); font-weight: 400; display: block; margin-top: -2px; }
+
+.nav { padding: 16px 12px; flex: 1; }
+.nav-section { margin-bottom: 20px; }
+.nav-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; padding: 0 8px; margin-bottom: 6px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--radius-sm); cursor: pointer; color: var(--text2); font-size: 14px; font-weight: 500; transition: all 0.15s; margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left; }
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active { background: rgba(108,99,255,0.15); color: var(--accent2); }
+.nav-item .icon { width: 18px; opacity: 0.8; }
+.nav-badge { margin-left: auto; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
+
+.sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+.user-card { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--radius-sm); }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.user-name { font-size: 13px; font-weight: 600; }
+.user-role { font-size: 11px; color: var(--text3); }
+
+/* Top bar */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 18px 28px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px); }
+.page-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+.topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+/* Buttons */
+.btn { padding: 8px 16px; border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #5b52ee; transform: translateY(-1px); }
+.btn-ghost { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+.btn-danger { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-icon { padding: 8px; border-radius: var(--radius-sm); background: var(--bg3); border: 1px solid var(--border); cursor: pointer; color: var(--text2); transition: all 0.15s; }
+.btn-icon:hover { color: var(--text); border-color: var(--border2); }
+
+/* Page content */
+.content { padding: 24px 28px; }
+
+/* Stat cards */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; position: relative; overflow: hidden; }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent-color, var(--accent)); opacity: 0.6; }
+.stat-label { font-size: 12px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.stat-value { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
+.stat-sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+.stat-change { font-size: 12px; font-weight: 600; margin-top: 4px; }
+.stat-change.up { color: var(--green); }
+.stat-change.down { color: var(--red); }
+
+/* Cards */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); }
+.card-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 15px; font-weight: 600; }
+.card-body { padding: 20px; }
+
+/* Grid layouts */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+tbody td { padding: 12px 12px; font-size: 13px; border-bottom: 1px solid var(--border); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-btc { background: rgba(247,147,26,0.15); color: var(--btc); }
+.badge-eth { background: rgba(98,126,234,0.15); color: var(--eth); }
+.badge-trx { background: rgba(239,0,39,0.15); color: var(--trx); }
+.badge-in { background: rgba(34,211,165,0.12); color: var(--green); }
+.badge-out { background: rgba(248,113,113,0.12); color: var(--red); }
+.badge-pending { background: rgba(251,191,36,0.12); color: var(--amber); }
+.badge-success { background: rgba(34,211,165,0.12); color: var(--green); }
+.badge-error { background: rgba(248,113,113,0.12); color: var(--red); }
+
+/* Mono text */
+.mono { font-family: var(--mono); font-size: 12px; }
+.addr { font-family: var(--mono); font-size: 12px; color: var(--text2); }
+.addr-short { cursor: pointer; }
+.addr-short:hover { color: var(--accent2); }
+
+/* Network dot */
+.net-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.net-dot-btc { background: var(--btc); box-shadow: 0 0 6px var(--btc); }
+.net-dot-eth { background: var(--eth); box-shadow: 0 0 6px var(--eth); }
+.net-dot-trx { background: var(--trx); box-shadow: 0 0 6px var(--trx); }
+
+/* Search input */
+.search-wrap { position: relative; }
+.search-input { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font); font-size: 13px; padding: 8px 12px 8px 34px; width: 240px; outline: none; transition: border-color 0.15s; }
+.search-input:focus { border-color: var(--accent); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
+select.filter-select { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font); font-size: 13px; padding: 8px 28px 8px 10px; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555a72'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
+
+/* Tabs */
+.tabs { display: flex; gap: 2px; background: var(--bg3); padding: 4px; border-radius: var(--radius-sm); width: fit-content; }
+.tab { padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text3); transition: all 0.15s; border: none; background: none; font-family: var(--font); }
+.tab.active { background: var(--bg2); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+.tab:hover:not(.active) { color: var(--text2); }
+
+/* Modal overlay */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; width: 480px; max-width: 90vw; box-shadow: var(--shadow); transform: translateY(16px); transition: transform 0.2s; }
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header { padding: 22px 24px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 17px; font-weight: 700; }
+.modal-body { padding: 24px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+/* Form */
+.form-group { margin-bottom: 18px; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.4px; }
+.form-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--mono); font-size: 13px; padding: 10px 12px; outline: none; transition: border-color 0.15s; }
+.form-input:focus { border-color: var(--accent); }
+.form-select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font); font-size: 13px; padding: 10px 12px; outline: none; transition: border-color 0.15s; cursor: pointer; }
+.form-select:focus { border-color: var(--accent); }
+.form-hint { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* Charts */
+.chart-wrap { position: relative; height: 220px; }
+
+/* Sync status indicator */
+.sync-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.sync-dot.running { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+.sync-dot.idle { background: var(--text3); box-shadow: none; animation: none; }
+
+/* Empty state */
+.empty { text-align: center; padding: 48px 24px; }
+.empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+.empty-title { font-size: 16px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+.empty-sub { font-size: 13px; color: var(--text3); }
+
+/* Notifications */
+.toast { position: fixed; bottom: 24px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+.toast-item { background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px; animation: slideIn 0.25s ease; min-width: 280px; }
+@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:none;opacity:1} }
+.toast-success { border-left: 3px solid var(--green); }
+.toast-error { border-left: 3px solid var(--red); }
+
+/* Pagination */
+.pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text2); }
+.pagination-btns { display: flex; gap: 4px; }
+.pg-btn { padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: var(--text2); font-size: 13px; cursor: pointer; transition: all 0.15s; }
+.pg-btn:hover { color: var(--text); border-color: var(--border2); }
+.pg-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pg-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Section headers */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.section-title { font-size: 16px; font-weight: 700; }
+
+/* Volume bars */
+.vol-bar-wrap { display: flex; align-items: center; gap: 10px; }
+.vol-bar-bg { flex: 1; height: 6px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
+.vol-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.vol-bar-in { background: var(--green); }
+.vol-bar-out { background: var(--red); }
+
+/* Progress ring */
+.progress-ring { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+
+/* Tooltip */
+[data-tip] { position: relative; cursor: help; }
+[data-tip]::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--bg4); color: var(--text); font-size: 11px; white-space: nowrap; padding: 4px 8px; border-radius: 5px; border: 1px solid var(--border2); pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 50; }
+[data-tip]:hover::after { opacity: 1; }
+
+/* Responsive tweaks */
+@media (max-width: 1200px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 800px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+}
+
+/* Login page */
+.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); }
+.login-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; padding: 40px; width: 380px; }
+.login-logo { text-align: center; margin-bottom: 32px; }
+.login-logo-icon { width: 56px; height: 56px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 12px; }
+.login-title { font-size: 22px; font-weight: 700; }
+.login-sub { font-size: 13px; color: var(--text3); }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<div class="toast" id="toastContainer"></div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const state = {
+  page: 'dashboard',
+  user: null,
+  token: localStorage.getItem('token'),
+  wallets: [],
+  transactions: [],
+  analytics: [],
+  syncStatus: {},
+  loading: false,
+  modal: null,
+  filters: { network: 'all', search: '', page: 1 },
+  txFilters: { walletId: null, page: 1, direction: 'all' },
+  analyticsFilter: { walletId: null, year: new Date().getFullYear() },
+  totalWallets: 0,
+  totalTx: 0,
+};
+
+// Mock data for demo (replace with real API calls)
+const MOCK = {
+  wallets: [
+    { id: '1', address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf', network: 'bitcoin', label: 'Genesis wallet', tags: ['cold'], is_active: true, last_sync: '2026-04-05T22:00:00Z' },
+    { id: '2', address: '0x742d35Cc6634C0532925a3b8D4C9C1F4b7Ac3fA', network: 'ethereum', label: 'Main ETH', tags: ['hot'], is_active: true, last_sync: '2026-04-05T23:00:00Z' },
+    { id: '3', address: 'TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE', network: 'tron', label: 'TRON treasury', tags: ['treasury'], is_active: true, last_sync: '2026-04-06T00:00:00Z' },
+    { id: '4', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', network: 'ethereum', label: 'USDT contract watcher', tags: [], is_active: true, last_sync: '2026-04-06T01:00:00Z' },
+    { id: '5', address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', network: 'bitcoin', label: 'Cold storage', tags: ['cold'], is_active: true, last_sync: '2026-04-05T20:00:00Z' },
+  ],
+  transactions: [
+    { tx_hash: '0xabc123def456abc123def456abc123def456abc123def456abc123def456abc1', timestamp: '2026-04-06T10:15:00Z', from_address: '0x742d35Cc...', to_address: '0xdAC17F95...', amount: '1250.500000', asset: 'USDT', direction: 'incoming', usd_value: '1250.50', network: 'ethereum', is_error: false },
+    { tx_hash: '0xdef789abc012def789abc012def789abc012def789abc012def789abc012def7', timestamp: '2026-04-05T18:30:00Z', from_address: '0x742d35Cc...', to_address: '0xA0b86991...', amount: '0.250000', asset: 'ETH', direction: 'outgoing', usd_value: '612.50', network: 'ethereum', is_error: false },
+    { tx_hash: 'abc123def456abc123def456abc123def456abc123def456abc123def456abc1', timestamp: '2026-04-05T12:00:00Z', from_address: 'TQn9Y2kh...', to_address: 'TXhMCqF2...', amount: '15000.000000', asset: 'TRX', direction: 'incoming', usd_value: '1650.00', network: 'tron', is_error: false },
+    { tx_hash: 'f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1', timestamp: '2026-04-04T09:00:00Z', from_address: '1A1zP1eP...', to_address: 'bc1qxy2kg...', amount: '0.05432100', asset: 'BTC', direction: 'outgoing', usd_value: '3450.80', network: 'bitcoin', is_error: false },
+    { tx_hash: '9876543210abcdef9876543210abcdef9876543210abcdef9876543210abcdef', timestamp: '2026-04-03T16:45:00Z', from_address: '0xExternal...', to_address: '0x742d35Cc...', amount: '5000.000000', asset: 'USDT', direction: 'incoming', usd_value: '5000.00', network: 'ethereum', is_error: false },
+  ],
+  monthly: [
+    { year: 2026, month: 4, asset: 'USDT', volume_in: '6250.50', volume_out: '1200.00', volume_total: '7450.50', net_flow: '5050.50', tx_count_in: 12, tx_count_out: 3, tx_count_total: 15 },
+    { year: 2026, month: 3, asset: 'USDT', volume_in: '14800.00', volume_out: '8200.00', volume_total: '23000.00', net_flow: '6600.00', tx_count_in: 28, tx_count_out: 15, tx_count_total: 43 },
+    { year: 2026, month: 2, asset: 'USDT', volume_in: '9100.00', volume_out: '5600.00', volume_total: '14700.00', net_flow: '3500.00', tx_count_in: 19, tx_count_out: 11, tx_count_total: 30 },
+    { year: 2026, month: 4, asset: 'ETH', volume_in: '1.25', volume_out: '0.80', volume_total: '2.05', net_flow: '0.45', tx_count_in: 5, tx_count_out: 2, tx_count_total: 7 },
+    { year: 2026, month: 3, asset: 'ETH', volume_in: '3.10', volume_out: '2.40', volume_total: '5.50', net_flow: '0.70', tx_count_in: 14, tx_count_out: 9, tx_count_total: 23 },
+    { year: 2026, month: 4, asset: 'BTC', volume_in: '0.12', volume_out: '0.054321', volume_total: '0.174321', net_flow: '0.065679', tx_count_in: 2, tx_count_out: 1, tx_count_total: 3 },
+    { year: 2026, month: 3, asset: 'BTC', volume_in: '0.34', volume_out: '0.18', volume_total: '0.52', net_flow: '0.16', tx_count_in: 6, tx_count_out: 4, tx_count_total: 10 },
+    { year: 2026, month: 4, asset: 'TRX', volume_in: '15000', volume_out: '4200', volume_total: '19200', net_flow: '10800', tx_count_in: 8, tx_count_out: 3, tx_count_total: 11 },
+  ],
+};
+
+// ─── Utils ────────────────────────────────────────────────────────────────────
+function shortAddr(addr) {
+  if (!addr) return '';
+  return addr.length > 16 ? addr.slice(0, 8) + '…' + addr.slice(-6) : addr;
+}
+
+function fmt(n, dec=2) {
+  const num = parseFloat(n);
+  if (isNaN(num)) return '—';
+  if (num > 1e9) return (num/1e9).toFixed(2) + 'B';
+  if (num > 1e6) return (num/1e6).toFixed(2) + 'M';
+  if (num > 1e3) return (num/1e3).toFixed(2) + 'K';
+  return num.toFixed(dec);
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+function monthName(m) {
+  return ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][m];
+}
+
+function netBadge(net) {
+  const cls = net === 'bitcoin' ? 'badge-btc' : net === 'ethereum' ? 'badge-eth' : 'badge-trx';
+  const label = net === 'bitcoin' ? 'BTC' : net === 'ethereum' ? 'ETH' : 'TRX';
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function dirBadge(dir) {
+  return dir === 'incoming'
+    ? '<span class="badge badge-in">↓ ВХ</span>'
+    : '<span class="badge badge-out">↑ ИСХ</span>';
+}
+
+function toast(msg, type='success') {
+  const container = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast-item toast-${type}`;
+  el.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span> ${msg}`;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+function copyAddr(addr) {
+  navigator.clipboard.writeText(addr).then(() => toast('Адрес скопирован в буфер'));
+}
+
+// ─── Render Functions ─────────────────────────────────────────────────────────
+
+function renderLogin() {
+  return `
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="login-logo-icon">⛓</div>
+        <div class="login-title">КриптоМонитор</div>
+        <div class="login-sub">Агрегатор блокчейн кошельков</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Эл. почта</label>
+        <input class="form-input" type="email" id="loginEmail" placeholder="admin@company.com" value="admin@company.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Пароль</label>
+        <input class="form-input" type="password" id="loginPass" placeholder="••••••••" value="password123"/>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="doLogin()">Войти →</button>
+    </div>
+  </div>`;
+}
+
+function renderSidebar() {
+  const pages = [
+    { id: 'dashboard', icon: '◈', label: 'Главная' },
+    { id: 'wallets', icon: '◉', label: 'Кошельки', badge: state.wallets.length },
+    { id: 'transactions', icon: '⇄', label: 'Транзакции' },
+    { id: 'analytics', icon: '▦', label: 'Аналитика' },
+    { id: 'export', icon: '⬇', label: 'Экспорт' },
+  ];
+  return `
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">⛓</div>
+      <div>
+        <div class="logo-text">КриптоМонитор</div>
+        <span class="logo-sub">Агрегатор кошельков</span>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-label">Навигация</div>
+        ${pages.map(p => `
+          <button class="nav-item ${state.page === p.id ? 'active' : ''}" onclick="navigate('${p.id}')">
+            <span class="icon">${p.icon}</span>
+            ${p.label}
+            ${p.badge ? `<span class="nav-badge">${p.badge}</span>` : ''}
+          </button>
+        `).join('')}
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Система</div>
+        <button class="nav-item" onclick="triggerSyncAll()">
+          <span class="icon">↺</span> Синхронизировать
+        </button>
+        <button class="nav-item" onclick="navigate('settings')">
+          <span class="icon">⚙</span> Настройки
+        </button>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="avatar">АД</div>
+        <div>
+          <div class="user-name">Администратор</div>
+          <div class="user-role">Полный доступ</div>
+        </div>
+        <button class="btn-icon" onclick="doLogout()" style="margin-left:auto" title="Выйти">⏻</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderDashboard() {
+  const totalIn = MOCK.monthly.filter(m => m.month === 4).reduce((s, m) => s + parseFloat(m.volume_in || 0) * (m.asset === 'USDT' ? 1 : m.asset === 'ETH' ? 2450 : m.asset === 'BTC' ? 63500 : 0.11), 0);
+  const totalOut = MOCK.monthly.filter(m => m.month === 4).reduce((s, m) => s + parseFloat(m.volume_out || 0) * (m.asset === 'USDT' ? 1 : m.asset === 'ETH' ? 2450 : m.asset === 'BTC' ? 63500 : 0.11), 0);
+  return `
+  <div class="topbar">
+    <div class="page-title">Главная</div>
+    <div class="topbar-actions">
+      <div class="sync-status">
+        <div class="sync-dot idle"></div>
+        Последний синк: сегодня 00:00 UTC
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="triggerSyncAll()">↺ Синхронизировать</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="stats-grid">
+      <div class="stat-card" style="--accent-color: var(--accent)">
+        <div class="stat-label">Всего кошельков</div>
+        <div class="stat-value">${MOCK.wallets.length}</div>
+        <div class="stat-sub">3 сети · все активны</div>
+        <div class="stat-change up">+5 за этот месяц</div>
+      </div>
+      <div class="stat-card" style="--accent-color: var(--green)">
+        <div class="stat-label">Объём IN — Апр 2026</div>
+        <div class="stat-value">$${fmt(totalIn)}</div>
+        <div class="stat-sub">по всем активам</div>
+        <div class="stat-change up">↑ 12% к марту</div>
+      </div>
+      <div class="stat-card" style="--accent-color: var(--red)">
+        <div class="stat-label">Объём OUT — Апр 2026</div>
+        <div class="stat-value">$${fmt(totalOut)}</div>
+        <div class="stat-sub">по всем активам</div>
+        <div class="stat-change down">↓ 5% к марту</div>
+      </div>
+      <div class="stat-card" style="--accent-color: var(--amber)">
+        <div class="stat-label">Транзакции — Апр 2026</div>
+        <div class="stat-value">36</div>
+        <div class="stat-sub">15 вх · 9 исх · 12 внутр</div>
+        <div class="stat-change up">↑ 8% к марту</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Объём по месяцам (USDT)</div>
+          <div class="tabs">
+            <button class="tab active">6 мес</button>
+            <button class="tab">12 мес</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap"><canvas id="volumeChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Распределение по сетям</div></div>
+        <div class="card-body">
+          <div class="chart-wrap" style="height:160px"><canvas id="netChart"></canvas></div>
+          <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+            ${[
+              { net: 'Ethereum', count: 2, color: '#627eea' },
+              { net: 'Bitcoin', count: 2, color: '#f7931a' },
+              { net: 'TRON', count: 1, color: '#ef0027' },
+            ].map(n => `
+              <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="width:10px;height:10px;border-radius:50%;background:${n.color}"></div>
+                  ${n.net}
+                </div>
+                <span style="color:var(--text2)">${n.count} кош.</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Последние транзакции</div>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('transactions')">Все →</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Хэш</th><th>Время</th><th>Актив</th><th>Сумма</th><th>Направление</th><th>Сеть</th>
+          </tr></thead>
+          <tbody>
+            ${MOCK.transactions.slice(0,5).map(tx => `
+            <tr>
+              <td><span class="addr addr-short mono" onclick="copyAddr('${tx.tx_hash}')" data-tip="Нажмите для копирования">${tx.tx_hash.slice(0,14)}…</span></td>
+              <td style="color:var(--text2);font-size:12px">${fmtDate(tx.timestamp)}</td>
+              <td><span style="font-weight:600">${tx.asset}</span></td>
+              <td class="mono">${parseFloat(tx.amount).toFixed(6)}</td>
+              <td>${dirBadge(tx.direction)}</td>
+              <td>${netBadge(tx.network)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderWallets() {
+  const filtered = MOCK.wallets.filter(w => {
+    if (state.filters.network !== 'all' && w.network !== state.filters.network) return false;
+    if (state.filters.search && !w.address.toLowerCase().includes(state.filters.search.toLowerCase()) && !(w.label||'').toLowerCase().includes(state.filters.search.toLowerCase())) return false;
+    return true;
+  });
+
+  return `
+  <div class="topbar">
+    <div class="page-title">Кошельки</div>
+    <div class="topbar-actions">
+      <div class="search-wrap">
+        <span class="search-icon">⊕</span>
+        <input class="search-input" type="text" placeholder="Поиск по адресу или метке…" value="${state.filters.search}" oninput="state.filters.search=this.value;rerender()"/>
+      </div>
+      <select class="filter-select" onchange="state.filters.network=this.value;rerender()">
+        <option value="all" ${state.filters.network==='all'?'selected':''}>Все сети</option>
+        <option value="bitcoin" ${state.filters.network==='bitcoin'?'selected':''}>Bitcoin</option>
+        <option value="ethereum" ${state.filters.network==='ethereum'?'selected':''}>Ethereum</option>
+        <option value="tron" ${state.filters.network==='tron'?'selected':''}>TRON</option>
+      </select>
+      <button class="btn btn-primary" onclick="openAddWallet()">+ Добавить кошелёк</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">${filtered.length} wallet${filtered.length!==1?'s':''}</div>
+        <div class="sync-status">
+          <div class="sync-dot"></div> Автосинк: ежедневно 00:00 UTC
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Адрес</th><th>Метка</th><th>Сеть</th><th>Теги</th><th>Последний синк</th><th>Действия</th>
+          </tr></thead>
+          <tbody>
+            ${filtered.map(w => `
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="net-dot net-dot-${w.network === 'bitcoin' ? 'btc' : w.network === 'ethereum' ? 'eth' : 'trx'}"></div>
+                  <span class="addr addr-short mono" onclick="copyAddr('${w.address}')" data-tip="${w.address}">${shortAddr(w.address)}</span>
+                </div>
+              </td>
+              <td style="color:var(--text2)">${w.label || '—'}</td>
+              <td>${netBadge(w.network)}</td>
+              <td>${(w.tags||[]).map(t=>`<span class="badge" style="background:var(--bg4);color:var(--text2);margin-right:4px">${t}</span>`).join('')||'—'}</td>
+              <td style="color:var(--text3);font-size:12px">${fmtDate(w.last_sync)}</td>
+              <td>
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-ghost btn-sm" onclick="state.analyticsFilter.walletId='${w.id}';navigate('analytics')">Аналитика</button>
+                  <button class="btn btn-ghost btn-sm" onclick="triggerSync('${w.id}','${w.address}')">↺</button>
+                  <button class="btn btn-ghost btn-sm btn-danger" onclick="removeWallet('${w.id}')">✕</button>
+                </div>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span>Показано ${filtered.length} из ${MOCK.wallets.length}</span>
+        <div class="pagination-btns">
+          <button class="pg-btn" disabled>←</button>
+          <button class="pg-btn active">1</button>
+          <button class="pg-btn">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Wallet Modal -->
+  <div class="modal-overlay ${state.modal === 'addWallet' ? 'open' : ''}" id="modalAddWallet" onclick="closeModal(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Добавить кошелёк</div>
+        <button class="btn-icon" onclick="state.modal=null;rerender()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Сеть</label>
+          <select class="form-select" id="newNetwork">
+            <option value="ethereum">Ethereum</option>
+            <option value="bitcoin">Bitcoin</option>
+            <option value="tron">TRON</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Адрес кошелька</label>
+          <input class="form-input" id="newAddress" placeholder="0x… / bc1q… / T…" autocomplete="off"/>
+          <div class="form-hint">Paste the full public address. Никогда не вводите приватные ключи.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Метка (необязательно)</label>
+          <input class="form-input" id="newLabel" placeholder="Холодное хранилище" style="font-family:var(--font)"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Теги (через запятую)</label>
+          <input class="form-input" id="newTags" placeholder="холодный, казначейство, биржа" style="font-family:var(--font)"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="state.modal=null;rerender()">Отмена</button>
+        <button class="btn btn-primary" onclick="submitAddWallet()">Добавить и синкнуть →</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderTransactions() {
+  const walletOptions = MOCK.wallets.map(w => `<option value="${w.id}">${shortAddr(w.address)} — ${w.label||w.network}</option>`).join('');
+  const filtered = state.txFilters.walletId
+    ? MOCK.transactions.filter(t => {
+        const wallet = MOCK.wallets.find(w => w.id === state.txFilters.walletId);
+        return wallet && t.network === wallet.network;
+      })
+    : MOCK.transactions;
+
+  return `
+  <div class="topbar">
+    <div class="page-title">Транзакции</div>
+    <div class="topbar-actions">
+      <select class="filter-select" onchange="state.txFilters.walletId=this.value||null;rerender()">
+        <option value="">Все кошельки</option>
+        ${walletOptions}
+      </select>
+      <select class="filter-select" onchange="state.txFilters.direction=this.value;rerender()">
+        <option value="all">Все направления</option>
+        <option value="incoming">Входящие</option>
+        <option value="outgoing">Исходящие</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ Скачать CSV</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">${filtered.length} транзакций</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Хэш</th><th>Время</th><th>Отправитель</th><th>Получатель</th><th>Сумма</th><th>Актив</th><th>Направление</th><th>USD</th><th>Сеть</th>
+          </tr></thead>
+          <tbody>
+            ${filtered.map(tx => `
+            <tr>
+              <td><span class="addr addr-short mono" onclick="copyAddr('${tx.tx_hash}')" data-tip="${tx.tx_hash}">${tx.tx_hash.slice(0,12)}…</span></td>
+              <td style="font-size:12px;color:var(--text2)">${fmtDate(tx.timestamp)}</td>
+              <td><span class="addr mono" onclick="copyAddr('${tx.from_address}')">${tx.from_address.slice(0,10)}…</span></td>
+              <td><span class="addr mono" onclick="copyAddr('${tx.to_address}')">${tx.to_address.slice(0,10)}…</span></td>
+              <td class="mono" style="font-weight:500">${parseFloat(tx.amount).toFixed(6)}</td>
+              <td><span style="font-weight:600;color:var(--text)">${tx.asset}</span></td>
+              <td>${dirBadge(tx.direction)}</td>
+              <td style="color:var(--text2)">$${parseFloat(tx.usd_value||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+              <td>${netBadge(tx.network)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span>Showing ${filtered.length} транзакций</span>
+        <div class="pagination-btns">
+          <button class="pg-btn" disabled>←</button>
+          <button class="pg-btn active">1</button>
+          <button class="pg-btn">→</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderAnalytics() {
+  const walletOptions = MOCK.wallets.map(w => `<option value="${w.id}" ${state.analyticsFilter.walletId===w.id?'selected':''}>${shortAddr(w.address)} — ${w.label||w.network}</option>`).join('');
+  const data = MOCK.monthly.filter(m => m.year === state.analyticsFilter.year);
+
+  // Group by asset
+  const assets = [...new Set(data.map(d => d.asset))];
+
+  return `
+  <div class="topbar">
+    <div class="page-title">Аналитика</div>
+    <div class="topbar-actions">
+      <select class="filter-select" onchange="state.analyticsFilter.walletId=this.value||null;rerender()">
+        <option value="">Все кошельки</option>
+        ${walletOptions}
+      </select>
+      <select class="filter-select" onchange="state.analyticsFilter.year=parseInt(this.value);rerender()">
+        <option value="2026" ${state.analyticsFilter.year===2026?'selected':''}>2026</option>
+        <option value="2025" ${state.analyticsFilter.year===2025?'selected':''}>2025</option>
+      </select>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- Volume chart -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        <div class="card-title">Объём по месяцам и активам — ${state.analyticsFilter.year}</div>
+        <div style="font-size:12px;color:var(--text3)">volume_in + volume_out = volume_total (валовый оборот)</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:260px"><canvas id="analyticsChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Monthly table -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">Детализация по месяцам</div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Период</th><th>Актив</th>
+            <th data-tip="Σ входящих транзакций">Volume IN</th>
+            <th data-tip="Σ исходящих транзакций">Volume OUT</th>
+            <th data-tip="IN + OUT (валовый оборот)">Total Volume</th>
+            <th data-tip="IN − OUT (положительное = нетто получатель)">Net Flow</th>
+            <th>TX In</th><th>TX Out</th><th>TX Total</th>
+          </tr></thead>
+          <tbody>
+            ${data.sort((a,b) => b.month - a.month || a.asset.localeCompare(b.asset)).map(row => {
+              const maxVol = Math.max(...data.map(d => parseFloat(d.volume_total)));
+              const pct = Math.round(parseFloat(row.volume_total) / maxVol * 100);
+              const netPositive = parseFloat(row.net_flow) >= 0;
+              return `
+              <tr>
+                <td style="font-weight:600">${monthName(row.month)} ${row.year}</td>
+                <td><span style="font-weight:700;font-size:13px">${row.asset}</span></td>
+                <td>
+                  <div class="vol-bar-wrap">
+                    <div class="vol-bar-bg"><div class="vol-bar-fill vol-bar-in" style="width:${pct}%"></div></div>
+                    <span class="mono" style="color:var(--green);min-width:90px;text-align:right">${fmt(row.volume_in, 4)}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="vol-bar-wrap">
+                    <div class="vol-bar-bg"><div class="vol-bar-fill vol-bar-out" style="width:${pct}%"></div></div>
+                    <span class="mono" style="color:var(--red);min-width:90px;text-align:right">${fmt(row.volume_out, 4)}</span>
+                  </div>
+                </td>
+                <td class="mono" style="font-weight:600">${fmt(row.volume_total, 4)}</td>
+                <td class="mono" style="color:${netPositive ? 'var(--green)' : 'var(--red)'}">
+                  ${netPositive ? '+' : ''}${fmt(row.net_flow, 4)}
+                </td>
+                <td style="color:var(--green)">${row.tx_count_in}</td>
+                <td style="color:var(--red)">${row.tx_count_out}</td>
+                <td style="color:var(--text2)">${row.tx_count_total}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderExport() {
+  return `
+  <div class="topbar">
+    <div class="page-title">Экспорт</div>
+  </div>
+  <div class="content">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Экспорт транзакций</div></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Кошельки</label>
+            <select class="form-select" id="expWallets" multiple style="height:120px">
+              <option value="all" selected>Все кошельки</option>
+              ${MOCK.wallets.map(w => `<option value="${w.id}">${shortAddr(w.address)} — ${w.label||w.network}</option>`).join('')}
+            </select>
+            <div class="form-hint">Удержите Ctrl/Cmd для выбора нескольких</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group">
+              <label class="form-label">Дата от</label>
+              <input class="form-input" type="date" id="expFrom" value="2026-01-01" style="font-family:var(--font)"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Дата до</label>
+              <input class="form-input" type="date" id="expTo" value="2026-04-06" style="font-family:var(--font)"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Формат</label>
+            <select class="form-select" id="expFormat">
+              <option value="csv">CSV</option>
+              <option value="excel">Excel (XLSX)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doExport()">⬇ Скачать экспорт</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Экспорт ежемесячного отчёта</div></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Год</label>
+            <select class="form-select" id="repYear">
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Активы</label>
+            <select class="form-select" id="repAsset">
+              <option value="all">Все активы</option>
+              <option value="USDT">USDT</option>
+              <option value="ETH">ETH</option>
+              <option value="BTC">BTC</option>
+              <option value="TRX">TRX</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:24px">
+            <label class="form-label">Формат</label>
+            <select class="form-select">
+              <option>CSV</option>
+              <option>Excel (XLSX)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doExportMonthly()">⬇ Скачать отчёт</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Структура файла экспорта</div></div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:16px">Колонки CSV транзакций:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          ${['wallet_address','label','tx_hash','timestamp','from_address','to_address','amount','asset','contract_address','direction','fee','usd_value','is_error'].map(col =>
+            `<span class="mono" style="background:var(--bg3);padding:4px 10px;border-radius:6px;font-size:12px;color:var(--accent2)">${col}</span>`
+          ).join('')}
+        </div>
+        <div style="margin-top:16px;font-size:13px;color:var(--text2)">Колонки отчёта объёмов:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          ${['wallet_address','year','month','asset','volume_in','volume_out','volume_total','net_flow','tx_count_in','tx_count_out'].map(col =>
+            `<span class="mono" style="background:var(--bg3);padding:4px 10px;border-radius:6px;font-size:12px;color:var(--green)">${col}</span>`
+          ).join('')}
+        </div>
+        <div style="margin-top:20px;background:var(--bg3);border-radius:8px;padding:14px;border-left:3px solid var(--accent)">
+          <div style="font-size:12px;color:var(--text2);line-height:1.8">
+            <strong style="color:var(--text)">Формулы объёма:</strong><br/>
+            volume_in = Σ amount WHERE direction=incoming AND NOT is_error<br/>
+            volume_out = Σ amount WHERE direction=outgoing AND NOT is_error<br/>
+            volume_total = volume_in + volume_out &nbsp;(gross turnover)<br/>
+            net_flow = volume_in − volume_out &nbsp;(positive = net receiver)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSettings() {
+  return `
+  <div class="topbar"><div class="page-title">Настройки</div></div>
+  <div class="content">
+    <div class="card" style="max-width:600px">
+      <div class="card-header"><div class="card-title">Конфигурация API</div></div>
+      <div class="card-body">
+        ${[
+          { label: 'Etherscan API Key', key: 'ETHERSCAN_API_KEY', placeholder: 'YourApiKeyToken' },
+          { label: 'Alchemy API Key', key: 'ALCHEMY_API_KEY', placeholder: 'your-alchemy-key' },
+          { label: 'Tronscan API Key', key: 'TRONSCAN_API_KEY', placeholder: 'your-tronscan-key' },
+        ].map(f => `
+          <div class="form-group">
+            <label class="form-label">${f.label}</label>
+            <input class="form-input" type="password" placeholder="${f.placeholder}" value="••••••••••••"/>
+          </div>
+        `).join('')}
+        <button class="btn btn-primary">Сохранить ключи</button>
+      </div>
+    </div>
+    <div class="card" style="max-width:600px;margin-top:16px">
+      <div class="card-header"><div class="card-title">Расписание синхронизации</div></div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">Время автосинка (UTC)</label>
+          <input class="form-input" type="time" value="00:00" style="font-family:var(--font);width:160px"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Размер батча</label>
+          <input class="form-input" type="number" value="100" style="width:160px;font-family:var(--font)"/>
+          <div class="form-hint">Кошельков обрабатывается параллельно за раз</div>
+        </div>
+        <button class="btn btn-primary">Сохранить расписание</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── Charts ───────────────────────────────────────────────────────────────────
+let charts = {};
+function destroyCharts() {
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
+  charts = {};
+}
+
+function initCharts() {
+  Chart.defaults.color = '#8b90a7';
+  Chart.defaults.font.family = "'Space Grotesk', sans-serif";
+  Chart.defaults.font.size = 12;
+
+  // Dashboard volume chart
+  const vc = document.getElementById('volumeChart');
+  if (vc) {
+    charts.vol = new Chart(vc, {
+      type: 'bar',
+      data: {
+        labels: ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'],
+        datasets: [
+          { label: 'Volume IN', data: [8200, 11500, 6800, 9100, 14800, 6250], backgroundColor: 'rgba(34,211,165,0.6)', borderRadius: 4 },
+          { label: 'Volume OUT', data: [5400, 8200, 4200, 5600, 8200, 1200], backgroundColor: 'rgba(248,113,113,0.5)', borderRadius: 4 },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'top' } },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.05)' } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { callback: v => '$' + fmt(v) } }
+        }
+      }
+    });
+  }
+
+  // Network pie
+  const nc = document.getElementById('netChart');
+  if (nc) {
+    charts.net = new Chart(nc, {
+      type: 'doughnut',
+      data: {
+        labels: ['Ethereum', 'Bitcoin', 'TRON'],
+        datasets: [{ data: [2, 2, 1], backgroundColor: ['#627eea', '#f7931a', '#ef0027'], borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        cutout: '65%'
+      }
+    });
+  }
+
+  // Analytics chart
+  const ac = document.getElementById('analyticsChart');
+  if (ac) {
+    const months = [...new Set(MOCK.monthly.map(m => m.month))].sort();
+    const usdtIn = months.map(m => { const r = MOCK.monthly.find(d=>d.month===m&&d.asset==='USDT'); return r ? parseFloat(r.volume_in) : 0; });
+    const usdtOut = months.map(m => { const r = MOCK.monthly.find(d=>d.month===m&&d.asset==='USDT'); return r ? parseFloat(r.volume_out) : 0; });
+    charts.analytics = new Chart(ac, {
+      type: 'bar',
+      data: {
+        labels: months.map(m => monthName(m)),
+        datasets: [
+          { label: 'USDT IN', data: usdtIn, backgroundColor: 'rgba(34,211,165,0.65)', borderRadius: 4 },
+          { label: 'USDT OUT', data: usdtOut, backgroundColor: 'rgba(248,113,113,0.55)', borderRadius: 4 },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'top' } },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.05)' } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, stacked: false }
+        }
+      }
+    });
+  }
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+function navigate(page) {
+  state.page = page;
+  rerender();
+}
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  const pass = document.getElementById('loginPass').value;
+  if (email && pass) {
+    state.user = { email, role: 'admin' };
+    state.token = 'mock-jwt-token';
+    localStorage.setItem('token', state.token);
+    toast('Добро пожаловать, Администратор!');
+    rerender();
+  }
+}
+
+function doLogout() {
+  state.user = null;
+  state.token = null;
+  localStorage.removeItem('token');
+  rerender();
+}
+
+function openAddWallet() {
+  state.modal = 'addWallet';
+  rerender();
+}
+
+function closeModal(e) {
+  if (e.target.classList.contains('modal-overlay')) {
+    state.modal = null;
+    rerender();
+  }
+}
+
+function submitAddWallet() {
+  const address = document.getElementById('newAddress').value.trim();
+  const network = document.getElementById('newNetwork').value;
+  const label = document.getElementById('newLabel').value.trim();
+  const tags = document.getElementById('newTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+
+  if (!address) { toast('Адрес обязателен', 'error'); return; }
+
+  MOCK.wallets.push({
+    id: String(Date.now()),
+    address, network, label, tags,
+    is_active: true,
+    last_sync: null,
+  });
+
+  state.modal = null;
+  toast(`Кошелёк добавлен: ${shortAddr(address)}`);
+  rerender();
+}
+
+function removeWallet(id) {
+  if (!confirm('Деактивировать этот кошелёк?')) return;
+  const idx = MOCK.wallets.findIndex(w => w.id === id);
+  if (idx !== -1) MOCK.wallets.splice(idx, 1);
+  toast('Кошелёк деактивирован');
+  rerender();
+}
+
+function triggerSync(id, addr) {
+  toast(`Синкронизация ${shortAddr(addr)}… (демо)`);
+}
+
+function triggerSyncAll() {
+  toast('Полный синк запущен для всех кошельков');
+}
+
+function doExport() {
+  // Generate CSV from mock data
+  const headers = ['wallet_address','label','tx_hash','timestamp','from_address','to_address','amount','asset','direction','fee','usd_value'];
+  const rows = MOCK.transactions.map(tx => [
+    tx.from_address, '', tx.tx_hash, tx.timestamp,
+    tx.from_address, tx.to_address, tx.amount, tx.asset,
+    tx.direction, '', tx.usd_value
+  ]);
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `transactions_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('Экспорт скачан');
+}
+
+function doExportMonthly() {
+  const headers = ['year','month','asset','volume_in','volume_out','volume_total','net_flow','tx_count_in','tx_count_out'];
+  const rows = MOCK.monthly.map(r => [r.year, r.month, r.asset, r.volume_in, r.volume_out, r.volume_total, r.net_flow, r.tx_count_in, r.tx_count_out]);
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `monthly_report_${state.analyticsFilter.year}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('Ежемесячный отчёт скачан');
+}
+
+function exportCSV() { doExport(); }
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function rerender() {
+  destroyCharts();
+  const app = document.getElementById('app');
+
+  if (!state.token && !state.user) {
+    app.innerHTML = renderLogin();
+    return;
+  }
+
+  // Set default user if token exists
+  if (!state.user) state.user = { email: 'admin@company.com', role: 'admin' };
+
+  const pages = {
+    dashboard: renderDashboard,
+    wallets: renderWallets,
+    transactions: renderTransactions,
+    analytics: renderAnalytics,
+    export: renderExport,
+    settings: renderSettings,
+  };
+
+  const pageContent = (pages[state.page] || renderDashboard)();
+
+  app.innerHTML = `
+    <div class="layout">
+      ${renderSidebar()}
+      <div class="main">${pageContent}</div>
+    </div>`;
+
+  requestAnimationFrame(initCharts);
+}
+
+// Init
+rerender();
+</script>
+</body>
+</html>
