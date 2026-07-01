@@ -10,7 +10,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
@@ -25,7 +25,7 @@ services:
     volumes:
       - redisdata:/data
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
@@ -36,20 +36,26 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     restart: unless-stopped
     env_file: .env
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-changeme}@postgres:5432/blockchain_agg
       REDIS_URL: redis://redis:6379/0
+      RANEX_API_KEY: ${RANEX_API_KEY:-}
+      RANEX_BASE_URL: ${RANEX_BASE_URL:-https://kyt-api.ranex.asia}
+      SHARD_PUBLIC_APP_ID: ${SHARD_PUBLIC_APP_ID:-}
+      SHARD_API_SECRET: ${SHARD_API_SECRET:-}
+      SHARD_BASE_URL: ${SHARD_BASE_URL:-https://shard.ru}
+      KYT_PROVIDER_CACHE_TTL_SECONDS: ${KYT_PROVIDER_CACHE_TTL_SECONDS:-86400}
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: uvicorn docker_app:app --host 0.0.0.0 --port 8000
+    command: uvicorn app.api.app:app --host 0.0.0.0 --port 8000
 
   # ─── Frontend (nginx) ────────────────────────────────────────────────────────
   frontend:
@@ -66,23 +72,27 @@ services:
   # ─── Prometheus ─────────────────────────────────────────────────────────────
   prometheus:
     image: prom/prometheus:v2.53.0
+    profiles:
+      - monitoring
     restart: unless-stopped
     volumes:
       - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - promdata:/prometheus
     ports:
-      - "9090:9090"
+      - "${PROMETHEUS_PORT:-127.0.0.1:9090}:9090"
 
   # ─── Grafana ────────────────────────────────────────────────────────────────
   grafana:
     image: grafana/grafana:11.1.0
+    profiles:
+      - monitoring
     restart: unless-stopped
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
     volumes:
       - grafdata:/var/lib/grafana
     ports:
-      - "3001:3000"
+      - "${GRAFANA_PORT:-127.0.0.1:3001}:3000"
     depends_on:
       - prometheus
 

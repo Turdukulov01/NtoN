@@ -1,0 +1,888 @@
+model:
+  name: "Модель риск-скоринга кошельков ChainLens"
+  version: "2025-12-01"
+  score_min: 0
+  score_max: 100
+  block_score_cap: 100
+
+weights:
+  A: 0.25
+  B: 0.25
+  C: 0.25
+  D: 0.25
+
+zones:
+  GREEN:
+    min: 0
+    max: 25
+    label: "Низкий"
+    category: "low"
+    monitoring_frequency: "quarterly"
+    recommended_actions:
+      - standard_monitoring
+  YELLOW:
+    min: 26
+    max: 50
+    label: "Средний"
+    category: "medium"
+    monitoring_frequency: "monthly"
+    recommended_actions:
+      - enhanced_monitoring
+      - request_sof_sow
+  ORANGE:
+    min: 51
+    max: 75
+    label: "Высокий"
+    category: "high"
+    monitoring_frequency: "weekly"
+    recommended_actions:
+      - manual_review
+      - restrict_operations
+      - prepare_compliance_report
+  RED:
+    min: 76
+    max: 100
+    label: "Критический"
+    category: "critical"
+    monitoring_frequency: "real_time"
+    recommended_actions:
+      - block_operations
+      - notify_financial_supervision_24h
+      - file_suspicious_operation_report
+      - freeze_assets_pending_investigation
+
+action_labels:
+  standard_monitoring: "Стандартный мониторинг"
+  enhanced_monitoring: "Усиленный контроль"
+  request_sof_sow: "Запрос источника средств / источника благосостояния"
+  manual_review: "Ручная комплаенс-проверка"
+  restrict_operations: "Ограничить операции до проверки"
+  prepare_compliance_report: "Подготовить внутренний комплаенс-отчет"
+  block_operations: "Блокировать операции"
+  notify_financial_supervision_24h: "Уведомить Финнадзор в течение 24 часов"
+  file_suspicious_operation_report: "Подать сообщение о подозрительной операции"
+  freeze_assets_pending_investigation: "Заморозить активы до расследования"
+  jurisdiction_edd: "Провести EDD по FATF-юрисдикции"
+  apply_fatf_countermeasures: "Рассмотреть контрмеры FATF"
+  sanctions_confirmed_match: "Подтвержденное совпадение с санкционным списком"
+
+data_sources:
+  sanctions_lists:
+    uk_ofsi:
+      source: "UK Sanctions List"
+      source_url: "https://sanctionslist.fcdo.gov.uk/docs/UK-Sanctions-List.xml"
+      format: "xml"
+      as_of: "2026-06-26"
+      screening_policy:
+        confirmed_match:
+          final_score: 100
+          risk_zone: RED
+          recommended_actions:
+            - block_operations
+            - freeze_assets_pending_investigation
+            - notify_financial_supervision_24h
+            - sanctions_confirmed_match
+        weak_match:
+          override: false
+          recommended_actions:
+            - manual_review
+  fatf_jurisdictions:
+    source: "FATF High-risk and other monitored jurisdictions"
+    source_urls:
+      high_risk_call_for_action: "https://www.fatf-gafi.org/en/publications/High-risk-and-other-monitored-jurisdictions/call-for-action-june-2026.html"
+      increased_monitoring: "https://www.fatf-gafi.org/en/publications/High-risk-and-other-monitored-jurisdictions/increased-monitoring-june-2026.html"
+    as_of: "2026-06-19"
+    scoring:
+      high_risk_call_for_action: 25
+      increased_monitoring: 18
+      vigilance: 8
+      not_listed: 0
+    policy:
+      high_risk_call_for_action:
+        minimum_score: 51
+        recommended_actions:
+          - jurisdiction_edd
+          - apply_fatf_countermeasures
+          - manual_review
+          - restrict_operations
+        reason: "FATF: юрисдикция из списка call for action; применить усиленную проверку и при необходимости контрмеры"
+      increased_monitoring:
+        minimum_score: 26
+        recommended_actions:
+          - jurisdiction_edd
+          - enhanced_monitoring
+          - request_sof_sow
+        reason: "FATF: юрисдикция под усиленным мониторингом; применить усиленную проверку"
+      vigilance:
+        minimum_score: 0
+        recommended_actions:
+          - enhanced_monitoring
+        reason: "FATF: требуется риск-ориентированный мониторинг"
+    high_risk_call_for_action:
+      - name: "Democratic People's Republic of Korea"
+        iso2: KP
+        iso3: PRK
+        aliases: ["DPRK", "North Korea", "КНДР", "Северная Корея"]
+      - name: "Iran"
+        iso2: IR
+        iso3: IRN
+        aliases: ["Islamic Republic of Iran", "Иран"]
+      - name: "Myanmar"
+        iso2: MM
+        iso3: MMR
+        aliases: ["Burma", "Мьянма"]
+    increased_monitoring:
+      - name: "Angola"
+        iso2: AO
+        iso3: AGO
+        aliases: ["Ангола"]
+      - name: "Bolivia"
+        iso2: BO
+        iso3: BOL
+        aliases: ["Plurinational State of Bolivia", "Боливия"]
+      - name: "Bosnia and Herzegovina"
+        iso2: BA
+        iso3: BIH
+        aliases: ["Bosnia", "Bosnia Herzegovina", "Босния и Герцеговина"]
+      - name: "Bulgaria"
+        iso2: BG
+        iso3: BGR
+        aliases: ["Болгария"]
+      - name: "Cameroon"
+        iso2: CM
+        iso3: CMR
+        aliases: ["Камерун"]
+      - name: "Côte d'Ivoire"
+        iso2: CI
+        iso3: CIV
+        aliases: ["Cote d'Ivoire", "Cote d Ivoire", "Ivory Coast", "Кот-д'Ивуар", "Кот д Ивуар"]
+      - name: "Democratic Republic of the Congo"
+        iso2: CD
+        iso3: COD
+        aliases: ["DRC", "Congo DR", "ДР Конго", "Демократическая Республика Конго"]
+      - name: "Haiti"
+        iso2: HT
+        iso3: HTI
+        aliases: ["Гаити"]
+      - name: "Iraq"
+        iso2: IQ
+        iso3: IRQ
+        aliases: ["Ирак"]
+      - name: "Kenya"
+        iso2: KE
+        iso3: KEN
+        aliases: ["Кения"]
+      - name: "Kuwait"
+        iso2: KW
+        iso3: KWT
+        aliases: ["Кувейт"]
+      - name: "Lao PDR"
+        iso2: LA
+        iso3: LAO
+        aliases: ["Laos", "Lao People's Democratic Republic", "Лаос"]
+      - name: "Lebanon"
+        iso2: LB
+        iso3: LBN
+        aliases: ["Ливан"]
+      - name: "Monaco"
+        iso2: MC
+        iso3: MCO
+        aliases: ["Монако"]
+      - name: "Nepal"
+        iso2: NP
+        iso3: NPL
+        aliases: ["Непал"]
+      - name: "Papua New Guinea"
+        iso2: PG
+        iso3: PNG
+        aliases: ["PNG", "Папуа — Новая Гвинея", "Папуа Новая Гвинея"]
+      - name: "South Sudan"
+        iso2: SS
+        iso3: SSD
+        aliases: ["Южный Судан"]
+      - name: "Syria"
+        iso2: SY
+        iso3: SYR
+        aliases: ["Syrian Arab Republic", "Сирия"]
+      - name: "Venezuela"
+        iso2: VE
+        iso3: VEN
+        aliases: ["Bolivarian Republic of Venezuela", "Венесуэла"]
+      - name: "Vietnam"
+        iso2: VN
+        iso3: VNM
+        aliases: ["Viet Nam", "Вьетнам"]
+      - name: "Virgin Islands (UK)"
+        iso2: VG
+        iso3: VGB
+        aliases: ["British Virgin Islands", "BVI", "Виргинские острова (Великобритания)", "Британские Виргинские острова"]
+      - name: "Yemen"
+        iso2: YE
+        iso3: YEM
+        aliases: ["Йемен"]
+    vigilance:
+      - name: "Russian Federation"
+        iso2: RU
+        iso3: RUS
+        aliases: ["Russia", "RF", "Россия", "Российская Федерация"]
+  model_jurisdiction_tiers:
+    source: "РИСК-СКОРИНГ-модель.pdf"
+    as_of: "2025-12-01"
+    scoring:
+      regulated_full: 0
+      basic_regulation: 10
+      offshore: 20
+    regulated_full:
+      - name: "United States"
+        iso2: US
+        iso3: USA
+        aliases: ["USA", "US", "США", "United States of America"]
+      - name: "European Union"
+        iso2: EU
+        iso3: EUR
+        aliases: ["EU", "ЕС", "Евросоюз"]
+      - name: "Switzerland"
+        iso2: CH
+        iso3: CHE
+        aliases: ["Швейцария"]
+      - name: "Singapore"
+        iso2: SG
+        iso3: SGP
+        aliases: ["Сингапур"]
+    basic_regulation:
+      - name: "Kyrgyzstan"
+        iso2: KG
+        iso3: KGZ
+        aliases: ["Kyrgyz Republic", "Кыргызстан", "Киргизия", "Кыргызская Республика", "КР"]
+      - name: "Kazakhstan"
+        iso2: KZ
+        iso3: KAZ
+        aliases: ["Казахстан"]
+      - name: "United Arab Emirates"
+        iso2: AE
+        iso3: ARE
+        aliases: ["UAE", "ОАЭ", "Emirates"]
+    offshore:
+      - name: "Seychelles"
+        iso2: SC
+        iso3: SYC
+        aliases: ["Сейшелы", "Republic of Seychelles"]
+      - name: "Cayman Islands"
+        iso2: KY
+        iso3: CYM
+        aliases: ["Cayman", "Каймановы острова"]
+      - name: "British Virgin Islands"
+        iso2: VG
+        iso3: VGB
+        aliases: ["BVI", "Virgin Islands (UK)", "Виргинские острова (Великобритания)", "Британские Виргинские острова"]
+
+external_kyt:
+  provider_score_policy: evidence_only
+  category_scores:
+    sanctions:
+      label: "Санкционная экспозиция"
+      score: 100
+      group: sanctions
+      aliases: ["Sanctions", "Sanction country", "sanction", "blacklist-usdt", "blacklist-usdc", "blacklist"]
+    ransomware:
+      label: "Вымогательское ПО"
+      score: 100
+      group: illicit
+      aliases: ["Ransom", "Ransomware", "ransom"]
+    terrorism:
+      label: "Терроризм"
+      score: 100
+      group: illicit
+      aliases: ["Terrorism"]
+    mixing_service:
+      label: "Миксер"
+      score: 100
+      group: obfuscation
+      aliases: ["Mixing Service", "Mixer"]
+    darknet_marketplace:
+      label: "Даркнет-маркетплейс"
+      score: 100
+      group: illicit
+      aliases: ["Darknet Marketplace", "Darknet Service", "darkmarket", "darkservice"]
+    scam:
+      label: "Мошенничество"
+      score: 100
+      group: illicit
+      aliases: ["Scam", "Fraudulent Exchange", "Fraud", "Ponzi", "ponzi"]
+    stolen_coins:
+      label: "Украденные средства"
+      score: 100
+      group: illicit
+      aliases: ["Stolen Coins", "Stolen Credit Cards", "Stolen DataBase", "stolen_token"]
+    illegal_service:
+      label: "Нелегальный сервис"
+      score: 100
+      group: illicit
+      aliases: ["Illegal Service", "Illegal financial transactions", "Illegal weapons"]
+    drugs:
+      label: "Наркотики"
+      score: 100
+      group: illicit
+      aliases: ["Drugs", "Precursors", "China precursors manufacturing"]
+    malware:
+      label: "Вредоносное ПО"
+      score: 100
+      group: illicit
+      aliases: ["Malware (excluding Ransom)", "DDOS service", "Cracked software"]
+    child_abuse:
+      label: "Материалы насилия над детьми"
+      score: 100
+      group: illicit
+      aliases: ["Child Abuse"]
+    human_trafficking:
+      label: "Торговля людьми"
+      score: 100
+      group: illicit
+      aliases: ["Human trafficking"]
+    smuggling:
+      label: "Контрабанда"
+      score: 100
+      group: illicit
+      aliases: ["Smuggling", "Smuggling weapons", "Smuggling precursors"]
+    high_risk_country:
+      label: "Экспозиция на высокорисковую страну"
+      score: 90
+      group: high_risk_service
+      aliases: ["High Risk country"]
+    p2p_exchange_very_high:
+      label: "P2P-обменник с очень высоким ML-риском"
+      score: 90
+      group: high_risk_service
+      aliases: ["P2P Exchange With Very High ML Risk"]
+    otc_exchange_very_high:
+      label: "OTC-обменник с очень высоким ML-риском"
+      score: 90
+      group: high_risk_service
+      aliases: ["OTC Exchange With Very High ML Risk"]
+    exchange_high:
+      label: "Биржа с высоким ML-риском"
+      score: 75
+      group: high_risk_service
+      aliases: ["Exchange With High ML Risk", "P2P Exchange With High ML Risk", "OTC Exchange With High ML Risk", "untrusted_vasp"]
+    exchange_moderate:
+      label: "Биржа с умеренным ML-риском"
+      score: 25
+      group: moderate_risk_service
+      aliases: ["Exchange With Moderate ML Risk", "P2P Exchange With Moderate ML Risk", "OTC Exchange With Moderate ML Risk", "p2p_exchange"]
+    exchange_low:
+      label: "Биржа с низким ML-риском"
+      score: 0
+      group: low_risk_service
+      aliases: ["Exchange With Low ML Risk", "P2P Exchange With Low ML Risk", "OTC Exchange With Low ML Risk"]
+    bridge:
+      label: "Мост"
+      score: 30
+      group: obfuscation
+      aliases: ["Bridge"]
+    dex:
+      label: "DEX"
+      score: 20
+      group: obfuscation
+      aliases: ["DEX (excluding Bridges)", "DEX"]
+    online_wallet:
+      label: "Онлайн-кошелек"
+      score: 15
+      group: moderate_risk_service
+      aliases: ["Online Wallet", "hot_wallet"]
+    gambling:
+      label: "Азартные игры"
+      score: 75
+      group: illicit
+      aliases: ["Gambling"]
+    cryptoatm:
+      label: "Крипто-ATM"
+      score: 30
+      group: moderate_risk_service
+      aliases: ["cryptoatm", "Crypto ATM"]
+    crowdfunding:
+      label: "Краудфандинг"
+      score: 20
+      group: moderate_risk_service
+      aliases: ["crowdfunding", "Crowdfunding"]
+    pep:
+      label: "PEP"
+      score: 70
+      group: high_risk_service
+      aliases: ["PEP"]
+    miner:
+      label: "Майнер"
+      score: 0
+      group: low_risk_service
+      aliases: ["Miner"]
+  policy:
+    exposure_rules: []
+
+blocks:
+  A:
+    label: "Профиль участника"
+    aggregation: "average"
+    components:
+      A1_jurisdiction:
+        label: "Юрисдикция"
+        kind: "jurisdiction_list"
+        source: "context.participant_profile.jurisdiction"
+        fallback_sources:
+          - "context.participant_profile.country"
+          - "context.participant_profile.jurisdiction_risk"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          low: 0
+          regulated: 0
+          basic_regulation: 10
+          medium: 10
+          partial_fatf: 15
+          high: 20
+          offshore: 20
+          prohibited: 25
+          high_risk: 25
+      A2_license:
+        label: "Лицензия / регистрация"
+        source: "context.participant_profile.license_status"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          licensed: 0
+          full: 0
+          registered: 10
+          partial: 12
+          pending: 15
+          temporary: 15
+          unlicensed: 25
+          revoked: 25
+      A3_ubo_transparency:
+        label: "UBO"
+        source: "context.participant_profile.ubo_transparency"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          known: 0
+          full: 0
+          partial: 12
+          nominee: 18
+          hidden: 25
+          unknown: 25
+          pep: 10
+      A4_reputation:
+        label: "Репутация и публичный профиль"
+        source: "context.participant_profile.reputation"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          clean: 0
+          positive: 0
+          neutral: 8
+          minor_issues: 8
+          complaints: 15
+          adverse_media: 15
+          violations: 25
+          confirmed_illicit: 25
+          criminal_link: 25
+
+  B:
+    label: "Активы и операции"
+    aggregation: "average"
+    components:
+      B1_asset_type:
+        label: "Тип виртуальных активов"
+        source: "context.participant_profile.asset_type"
+        fallback_sources:
+          - "context.wallet_profile.asset_type"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          major_crypto: 3
+          regulated_crypto: 3
+          stablecoin_regulated: 6
+          stablecoin: 8
+          altcoin: 12
+          defi_token: 15
+          nft: 15
+          privacy_coin: 30
+          unknown_token: 30
+          unverified_token: 30
+      B2_sof_sow:
+        label: "Источник средств / источник благосостояния"
+        source: "context.participant_profile.sof_sow_status"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          verified: 0
+          full: 0
+          partial: 12
+          transaction_only: 12
+          self_declared: 20
+          declared_unverified: 20
+          refused: 35
+          inconsistent_profile: 35
+      B3_mixer_tumbler_bridge:
+        label: "Миксеры / tumblers / мосты"
+        source: "metrics.external_kyt_mixer_bridge_exposure_percent"
+        fallback_sources:
+          - "metrics.external_kyt_obfuscation_exposure_percent"
+        missing_score: 0
+        thresholds:
+          - { gte: 20, score: 35 }
+          - { gte: 5, score: 15 }
+          - { gte: 0.01, score: 10 }
+          - { gte: 0, score: 0 }
+      B4_dex_usage:
+        label: "Использование DEX"
+        source: "context.transaction_profile.dex_usage"
+        fallback_sources:
+          - "metrics.external_kyt_dex_exposure_percent"
+        default: "none"
+        options:
+          none: 0
+          cex_only: 0
+          regulated_dex: 5
+          popular_dex: 12
+          dex_layering: 20
+          high_risk_pool: 20
+        thresholds:
+          - { gte: 20, score: 20 }
+          - { gte: 1, score: 12 }
+          - { gte: 0.01, score: 5 }
+          - { gte: 0, score: 0 }
+
+  C:
+    label: "Транзакционный риск"
+    aggregation: "average"
+    components:
+      C1_transaction_volume:
+        label: "Объемы транзакций"
+        source: "context.transaction_profile.volume_profile"
+        fallback_sources:
+          - "context.participant_profile.volume_profile"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          within_profile: 3
+          two_to_five_x: 12
+          above_profile_2_5x: 12
+          above_profile_gt_5x: 20
+          structuring: 20
+          smurfing: 20
+      C2_frequency:
+        label: "Частота транзакций"
+        source: "metrics.tx_per_month"
+        thresholds:
+          - { gte: 1000, score: 18 }
+          - { gte: 100, score: 12 }
+          - { gte: 10, score: 5 }
+          - { gte: 0, score: 0 }
+      C3_geography:
+        label: "География операций"
+        source: "context.transaction_profile.geography_status"
+        fallback_sources:
+          - "context.participant_profile.operation_geography"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          single_low_risk: 3
+          regulated_countries: 8
+          offshore: 18
+          high_risk_countries: 25
+          rapid_jurisdiction_hopping: 25
+      C4_counterparties:
+        label: "Контрагенты"
+        source: "context.transaction_profile.counterparty_status"
+        fallback_sources:
+          - "metrics.closest_risk_hop"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          verified: 2
+          known_cex: 2
+          partially_identified: 10
+          p2p: 10
+          mostly_unhosted: 18
+          sanctions_2_3_hops: 20
+          sanctions_direct: 20
+        thresholds:
+          - { lte: 1, score: 20 }
+          - { lte: 3, score: 18 }
+      C5_liquidity_pools:
+        label: "Пулы ликвидности"
+        source: "context.transaction_profile.liquidity_pool_status"
+        fallback_sources:
+          - "metrics.external_kyt_liquidity_pool_exposure_percent"
+        default: "none"
+        options:
+          none: 0
+          legitimate: 5
+          known_tokens_pool: 5
+          unaudited: 12
+          high_risk_pool: 15
+        thresholds:
+          - { gte: 10, score: 15 }
+          - { gte: 1, score: 12 }
+          - { gte: 0.01, score: 5 }
+          - { gte: 0, score: 0 }
+
+  D:
+    label: "Комплаенс и контроль"
+    aggregation: "average"
+    components:
+      D1_aml_kyc:
+        label: "Политики AML/KYC"
+        source: "context.control_profile.aml_kyc_status"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          full: 1
+          complete: 1
+          basic: 12
+          standard: 12
+          partial: 22
+          weak: 22
+          absent: 30
+          no_policy: 30
+          bypass: 30
+      D2_client_funds_segregation:
+        label: "Учет клиентских средств"
+        source: "context.control_profile.client_funds_segregation"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          full: 0
+          daily_reconciliation: 0
+          partial: 15
+          mixed_custody: 15
+          not_separate: 25
+          no_records: 25
+      D3_regulatory_reporting:
+        label: "Отчетность регулятору"
+        source: "context.control_profile.regulatory_reporting"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          proactive: 1
+          monthly: 1
+          regular: 8
+          quarterly: 8
+          irregular: 18
+          delayed: 18
+          none: 25
+          refused: 25
+          non_cooperation: 25
+      D4_request_response:
+        label: "Реакция на запросы"
+        source: "context.control_profile.request_response"
+        default: "not_provided"
+        options:
+          not_provided: 0
+          fast: 1
+          less_than_24h: 1
+          standard: 8
+          one_to_three_days: 8
+          slow: 15
+          more_than_5_days: 15
+          ignored: 20
+          refused: 20
+
+risk_tags:
+  scam: { score: 100, label: "Мошенничество", category: "critical" }
+  ransom: { score: 100, label: "Программы-вымогатели", category: "critical", aliases: ["ransomware"] }
+  illegal: { score: 100, label: "Преступная деятельность", category: "critical" }
+  ponzi: { score: 100, label: "Финансовые пирамиды", category: "critical" }
+  hacking: { score: 100, label: "Хакинг", category: "critical" }
+  phishing: { score: 100, label: "Фишинг", category: "critical" }
+  blackmail: { score: 100, label: "Шантаж", category: "critical" }
+  darkmarket: { score: 100, label: "Даркмаркет", category: "critical", aliases: ["darknet", "dark_market"] }
+  darkservice: { score: 100, label: "Дарксервис", category: "critical", aliases: ["dark_service"] }
+  malware: { score: 100, label: "Вредоносное ПО", category: "critical" }
+  stolen_token: { score: 100, label: "Украденные средства", category: "critical", aliases: ["stolen funds", "stolen_funds"] }
+  drugs: { score: 100, label: "Наркотики", category: "critical" }
+  sanction: { score: 25, label: "Санкции и ограничительные меры", category: "critical", aliases: ["sanctions", "sanctioned"] }
+  illegal_arms_sell: { score: 100, label: "Оружие", category: "critical", aliases: ["illegal arms sell"] }
+  tfrisk: { score: 100, label: "Финансирование терроризма", category: "critical", aliases: ["terrorism", "terrorist_financing"] }
+  child_abuse_material: { score: 100, label: "Насилие над детьми", category: "critical", aliases: ["child abuse material"] }
+  human_trafficking: { score: 100, label: "Торговля людьми", category: "critical", aliases: ["human trafficking"] }
+  enforcement_actions: { score: 100, label: "Арест", category: "critical", aliases: ["enforcement actions"] }
+  fpwmd: { score: 100, label: "ФРОМУ", category: "critical" }
+  seized_funds: { score: 25, label: "Конфискация", category: "high", aliases: ["seized funds"] }
+  untrusted_service: { score: 75, label: "Нелегальная деятельность", category: "high", aliases: ["untrusted service"] }
+  dice: { score: 50, label: "Игровые автоматы", category: "medium" }
+  adult_content: { score: 100, label: "Порнография", category: "critical", aliases: ["adult content"] }
+  anonymizing_activity: { score: 50, label: "Маскировка", category: "high", aliases: ["anonymizing activity"] }
+  mixer: { score: 25, label: "Криптомиксер", category: "critical" }
+  gambling: { score: 50, label: "Онлайн-казино", category: "medium" }
+  fund: { score: 70, label: "Сбор средств", category: "high" }
+  nonregulated_vasp: { score: 40, label: "Высокорисковая криптобиржа", category: "high", aliases: ["nonregulated vasp"] }
+  dex_de_fi: { score: 40, label: "Смарт-контракт", category: "medium", aliases: ["dex(de-fi)", "dex", "defi"] }
+  charity: { score: 40, label: "Благотворительность", category: "medium" }
+  donation: { score: 70, label: "Пожертвования", category: "high" }
+  crowdfunding: { score: 40, label: "Краудфандинг", category: "medium" }
+  administrative_offence: { score: 40, label: "Административное правонарушение", category: "medium", aliases: ["administrative offence"] }
+  ua_support: { score: 100, label: "Поддержка", category: "critical", aliases: ["UA Support"] }
+  cloudmining: { score: 20, label: "Облачный майнинг", category: "low" }
+  cryptoatm: { score: 30, label: "Банкомат цифровых валют", category: "medium" }
+  civil_lawsuit: { score: 50, label: "Судебный спор", category: "medium", aliases: ["civil lawsuit"] }
+  otc: { score: 20, label: "ОТС-площадка", category: "low" }
+  p2p_exchange: { score: 30, label: "P2P-площадка", category: "medium", aliases: ["p2p exchange"] }
+  investment: { score: 20, label: "Цифровой банк", category: "low" }
+  cold_wallet: { score: 20, label: "Холодный кошелек", category: "low", aliases: ["cold wallet"] }
+  nft: { score: 100, label: "NFT-платформа", category: "critical" }
+  game: { score: 40, label: "Игры и игровая валюта", category: "medium" }
+  lending: { score: 10, label: "Кредитование", category: "low" }
+  exchange: { score: 10, label: "Криптобиржа", category: "low" }
+  exchange_mr: { score: 25, label: "Криптобиржа умеренного риска", category: "medium", aliases: ["Exchange MR"] }
+  custody: { score: 5, label: "Кастодиальное хранение", category: "low" }
+  payment_provider: { score: 10, label: "Криптоплатежи", category: "low" }
+  mining_pool: { score: 5, label: "Майнинг-пул", category: "low" }
+  miner: { score: 0, label: "Майнинг", category: "info" }
+  media: { score: 20, label: "СМИ", category: "low" }
+  political: { score: 20, label: "Политические партии", category: "low" }
+  cultural: { score: 5, label: "Учреждения культуры", category: "low" }
+  education: { score: 5, label: "Образование", category: "low" }
+  government: { score: 20, label: "Гос.орган", category: "low" }
+  faucet: { score: 5, label: "Вознаграждения", category: "low" }
+  marketplace: { score: 20, label: "Онлайн-торговля", category: "low" }
+  extremism: { score: 100, label: "Экстремизм", category: "critical" }
+  pep: { score: 70, label: "Иностранный агент", category: "high" }
+  high_risk_jurisdiction: { score: 75, label: "Высокорисковая юрисдикция", category: "high", aliases: ["High Risk Jurisdiction"] }
+  info: { score: 0, label: "Инфо", category: "info" }
+  infrastructure_services: { score: 50, label: "Инфраструктура", category: "medium", aliases: ["infrastructure services"] }
+  individual: { score: 0, label: "Адрес физического лица", category: "info" }
+  no_info: { score: 0, label: "Неопределенный владелец", category: "info", aliases: ["no info"] }
+
+known_addresses: []
+
+override_rules:
+  - id: mixer_1hop_exposure
+    type: tag_within_hops
+    tags: [mixer, anonymizing_activity]
+    max_hop: 1
+    final_score: 100
+    risk_zone: RED
+    reason: "Миксер или сервис сокрытия происхождения средств на расстоянии <= 1 hop"
+  - id: sanctions_1hop_exposure
+    type: tag_within_hops
+    tags: [sanction]
+    max_hop: 1
+    final_score: 100
+    risk_zone: RED
+    reason: "Санкционная экспозиция на расстоянии <= 1 hop"
+  - id: darknet_exposure
+    type: tag_within_hops
+    tags: [darkmarket, darkservice]
+    max_hop: 1
+    final_score: 100
+    risk_zone: RED
+    reason: "Связь <= 1 hop с darknet-адресом"
+  - id: ransomware_exposure
+    type: tag_within_hops
+    tags: [ransom]
+    max_hop: 3
+    final_score: 100
+    risk_zone: RED
+    reason: "Экспозиция на ransomware"
+  - id: critical_illicit_tag
+    type: tag_within_hops
+    tags:
+      - scam
+      - illegal
+      - ponzi
+      - hacking
+      - phishing
+      - blackmail
+      - malware
+      - stolen_token
+      - drugs
+      - illegal_arms_sell
+      - tfrisk
+      - child_abuse_material
+      - human_trafficking
+      - enforcement_actions
+      - fpwmd
+      - adult_content
+      - ua_support
+      - nft
+      - extremism
+    max_hop: 1
+    final_score: 100
+    risk_zone: RED
+    reason: "Критический криминальный risk tag на расстоянии <= 1 hop"
+  - id: sof_sow_refused
+    type: context_equals
+    path: "participant_profile.sof_sow_status"
+    value: "refused"
+    final_score: 100
+    risk_zone: RED
+    reason: "Отказ от предоставления SoF/SoW"
+  - id: sof_sow_inconsistent_profile
+    type: context_equals
+    path: "participant_profile.sof_sow_status"
+    value: "inconsistent_profile"
+    final_score: 100
+    risk_zone: RED
+    reason: "Заявленный доход не соответствует объему операций"
+  - id: privacy_or_unknown_asset
+    type: context_equals
+    path: "participant_profile.asset_type"
+    values: ["privacy_coin", "unknown_token", "unverified_token"]
+    final_score: 100
+    risk_zone: RED
+    reason: "Использование privacy-коинов или неидентифицированных токенов"
+  - id: revoked_license
+    type: context_equals
+    path: "participant_profile.license_status"
+    value: "revoked"
+    final_score: 100
+    risk_zone: RED
+    reason: "Отозванная лицензия"
+  - id: criminal_reputation_link
+    type: context_equals
+    path: "participant_profile.reputation"
+    values: ["criminal_link", "confirmed_illicit"]
+    final_score: 100
+    risk_zone: RED
+    reason: "Связь участника с криминальной деятельностью"
+  - id: high_risk_dex_pool
+    type: context_equals
+    path: "transaction_profile.dex_usage"
+    value: "high_risk_pool"
+    final_score: 100
+    risk_zone: RED
+    reason: "DEX high-risk pool или sanctioned/darknet liquidity"
+  - id: high_risk_liquidity_pool
+    type: context_equals
+    path: "transaction_profile.liquidity_pool_status"
+    value: "high_risk_pool"
+    final_score: 100
+    risk_zone: RED
+    reason: "High-risk liquidity pool, связанный с fraud/darknet/ransomware"
+  - id: aml_kyc_bypass
+    type: context_equals
+    path: "control_profile.aml_kyc_status"
+    value: "bypass"
+    final_score: 100
+    risk_zone: RED
+    reason: "Намеренный обход процедур KYC/AML"
+  - id: non_cooperation
+    type: context_equals
+    path: "control_profile.request_response"
+    values: ["ignored", "refused"]
+    final_score: 100
+    risk_zone: RED
+    reason: "Отказ от сотрудничества или игнорирование запросов"
+  - id: regulatory_non_cooperation
+    type: context_equals
+    path: "control_profile.regulatory_reporting"
+    values: ["refused", "non_cooperation"]
+    final_score: 100
+    risk_zone: RED
+    reason: "Отказ от сотрудничества с расследованием или регулятором"
+  - id: no_client_funds_records
+    type: context_equals
+    path: "control_profile.client_funds_segregation"
+    value: "no_records"
+    final_score: 100
+    risk_zone: RED
+    reason: "Нет учета клиентских средств"

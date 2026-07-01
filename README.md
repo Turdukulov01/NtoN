@@ -28,6 +28,232 @@ Redis Queue + Rate Limiter
 PostgreSQL ── Redis cache ── S3/MinIO
 ```
 
+### Структура кода
+
+```
+app/
+  api/                 # FastAPI app factory и HTTP routers
+  application/         # use-cases: сбор отчета кошелька, трассировка графа
+  domain/              # чистые бизнес-правила: risk engine, wallet analytics
+  infrastructure/      # внешние blockchain clients и normalizers
+  core/                # настройки, форматирование, периоды, DB/Redis interfaces
+  adapters/            # долгоживущие network adapters для worker pipeline
+  workers/             # sync/aggregation jobs
+```
+
+Корневой каталог содержит только конфигурацию, документацию и deployment-файлы.
+Python-код приложения находится внутри `app/`; запуск API: `uvicorn app.api.app:app`.
+
+### Санкционный screening
+
+Санкционные списки хранятся как reference data, отдельно от `risk_model.yaml`.
+`risk_model.yaml` задает правила и override policy, а сами списки импортируются в PostgreSQL.
+
+Первый источник: UK Sanctions List XML.
+
+```bash
+alembic upgrade head
+python scripts/import_uk_sanctions_xml.py --download
+# или из локального файла
+python scripts/import_uk_sanctions_xml.py --xml data/sanctions/uk_official/UK-Sanctions-List.xml
+```
+
+Основные таблицы:
+
+```
+sanctions_import_runs
+sanctions_subjects
+sanctions_names
+sanctions_documents
+sanctions_addresses
+sanctions_matches
+```
+
+Screening API:
+
+```
+POST /api/sanctions/screen
+```
+
+Confirmed match по `Unique ID`, `OFSI Group ID`, документу или `name + secondary field`
+дает `override_hit=true` и итоговый RED через risk engine. Совпадение только по имени
+не дает override и уходит в manual review.
+
+### Risk assessment pipeline
+
+Risk scoring теперь запускается как единый pipeline:
+
+```
+wallet report
+    ↓
+DB address_risk_tags
+    ↓
+sanctions screening по client / UBO / director / related parties
+    ↓
+risk engine
+    ↓
+risk_assessments + risk_assessment_evidence
+```
+
+Persistent таблицы:
+
+```
+address_risk_tags           # наша адресная risk-разметка
+address_risk_tag_events     # история create/update/deactivate по risk-разметке
+kyt_provider_reports        # сохранённые KYT-проверки внешних провайдеров
+kyt_exposures               # нормализованные exposure categories из provider reports
+risk_assessments            # сохранённый результат скоринга
+risk_assessment_evidence    # evidence: tags, sanctions hits, exposures
+```
+
+Основные endpoints:
+
+```
+GET  /api/wallet/validate-address
+POST /api/risk/assess-wallet
+POST /api/risk/address-tags
+GET  /api/risk/address-tags
+GET  /api/risk/address-tags/{tag_id}/events
+GET  /api/risk/kyt-reports
+GET  /api/risk/kyt-reports/{report_id}
+DELETE /api/risk/kyt-reports/{report_id}
+GET  /api/risk/assessments/{assessment_id}
+```
+
+Для внешних KYT-провайдеров настройте ключи в `.env` или секретах окружения:
+
+```bash
+RANEX_API_KEY=...
+RANEX_BASE_URL=https://kyt-api.ranex.asia
+SHARD_PUBLIC_APP_ID=...
+SHARD_API_SECRET=...
+SHARD_BASE_URL=https://shard.ru
+KYT_PROVIDER_CACHE_TTL_SECONDS=86400
+```
+
+Shard Risk API использует HMAC: `X-Public-App-ID` + `X-Hash`, где hash считается от URI и тела запроса секретом `SHARD_API_SECRET`.
+
+`/api/risk/assess-wallet` принимает старый формат запроса и дополнительно:
+
+```json
+{
+  "participant_profile": {
+    "jurisdiction": "Kyrgyzstan",
+    "license_status": "registered",
+    "ubo_transparency": "partial",
+    "reputation": "neutral",
+    "asset_type": "stablecoin_regulated",
+    "sof_sow_status": "verified"
+  },
+  "transaction_profile": {
+    "volume_profile": "within_profile",
+    "geography_status": "regulated_countries",
+    "counterparty_status": "verified",
+    "dex_usage": "none",
+    "liquidity_pool_status": "none"
+  },
+  "control_profile": {
+    "aml_kyc_status": "full",
+    "client_funds_segregation": "full",
+    "regulatory_reporting": "regular",
+    "request_response": "standard"
+  },
+  "screening_subjects": [
+    {
+      "checked_subject_type": "client",
+      "name": "MOHAMMAD HASSAN AKHUND",
+      "passport_numbers": ["P04581926"]
+    }
+  ],
+  "persist_assessment": true
+}
+```
+
+Эти поля соответствуют PDF-модели A/B/C/D. Если данных по клиенту или сервису нет,
+поля лучше не передавать: модель считает их как `not_provided`, а не подставляет догадки
+из адреса кошелька.
+
+Если санкционный screening дал confirmed match, risk engine ставит `final_score=100`,
+`risk_zone=RED`, `override_reasons=["sanctions_screening_confirmed"]`.
+Если найден только слабый/name-only match, override не применяется, но evidence сохраняется.
+
+Внешние KYT-данные по адресу передаются отдельно как `external_kyt` или подтягиваются
+через provider adapter, например Ranex API или Shard Risk API. Это не confirmed sanctions match, а внешняя
+адресная атрибуция/экспозиция, поэтому provider score используется как evidence, а итоговый
+балл считает наша модель по нормализованным категориям.
+
+```json
+{
+  "kyt_provider": "ranex",
+  "external_kyt_required": true,
+  "force_kyt_refresh": false
+}
+```
+
+Для Shard используйте `"kyt_provider": "shard"`. По умолчанию для TRON выбирается
+currency tag `trx-usdt`; при необходимости токен можно передать через `kyt_token`
+или `wallet_profile.token`.
+
+Порядок работы provider cache:
+
+```
+wallet address
+    ↓
+fresh kyt_provider_reports row exists?
+    ↓ yes                         ↓ no / force refresh
+use PostgreSQL KYT check           call provider API
+    ↓                              ↓
+risk engine                        save raw_response + normalized_payload + kyt_exposures
+                                   ↓
+                                risk engine
+```
+
+Raw provider response хранится в `kyt_provider_reports.raw_response` (`JSONB`), нормализованный
+payload — в `kyt_provider_reports.normalized_payload`, а категории/проценты — в `kyt_exposures`.
+Это кеш внешних данных, а не наш итоговый risk assessment.
+
+В UI страница `KYT база` показывает сохранённые KYT-проверки внешних провайдеров, top exposures,
+детальный provider payload и внутренние `address_risk_tags`. Обычные `wallet.tags`
+остаются операционными метками списка кошельков и не влияют на scoring; на scoring
+влияют только risk tags из `address_risk_tags`, YAML или явного request payload.
+
+Также можно передать уже нормализованные KYT-exposures вручную:
+
+```json
+{
+  "external_kyt": {
+    "provider": "manual",
+    "source": "External KYT",
+    "score_policy": "evidence_only",
+    "address": "TTrzEDXhgDD8f2jmV47NdUE4EQ8bHv8ip2",
+    "network": "tron",
+    "risk_score": 22.72,
+    "exposures": [
+      {"name": "Sanctions", "percent": 9.9, "amount_human": "31327.06 TRX"},
+      {"name": "Bridge", "percent": 7.59, "amount_human": "24016.65 TRX"}
+    ]
+  }
+}
+```
+
+Provider score можно использовать как minimum score floor только явно:
+
+```json
+{
+  "external_kyt": {
+    "score_policy": "minimum_score",
+    "risk_score": 60,
+    "exposures": []
+  }
+}
+```
+
+Важно: `Sanctions=9.9%` в KYT-ответе означает экспозицию кошелька к категории,
+а не подтверждённого санкционного владельца. RED override остаётся только за confirmed
+screening match по санкционной базе, прямую/близкую risk-разметку адреса или другой
+override-индикатор из PDF-модели. Косвенная KYT exposure используется как evidence и
+компонентный сигнал, но сама по себе не копирует score провайдера и не делает RED.
+
 ### Компоненты
 
 | Компонент | Технология | Назначение |

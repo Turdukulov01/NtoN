@@ -1,7 +1,10 @@
+alembic
 fastapi
 uvicorn[standard]
+httpx
 redis
 asyncpg
 SQLAlchemy
 python-dotenv
 pydantic-settings
+PyYAML
